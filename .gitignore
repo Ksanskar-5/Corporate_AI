@@ -1,0 +1,52 @@
+# Data & Documents (too large or confidential for Git)
+*.csv
+*.zip
+*.pdf
+*.duckdb
+data/*.duckdb
+*.db
+*.sqlite
+*.jsonl
+data/synthetic/*
+!data/synthetic/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.env
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Outputs (regenerable)
+outputs/models/*.pt
+outputs/models/*.pkl
+outputs/synthetic_data/*.csv
+
+# Docker
+.dockerignore
