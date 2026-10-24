@@ -17,8 +17,9 @@ class RAGSynthesizer:
     Retrieves context-relevant exemplars and synthesizes new text.
     """
 
-    def __init__(self, top_k: int = 3):
+    def __init__(self, top_k: int = 3, guardrail=None):
         self.top_k = top_k
+        self.guardrail = guardrail
         self.vectorizer = TfidfVectorizer(max_features=5000, stop_words="english")
         self.records = []
         self.tfidf_matrix = None
@@ -36,7 +37,10 @@ class RAGSynthesizer:
         return self
 
     def _sanitize_entities(self, text: str) -> str:
-        """Replaces real names/emails with randomized synthetic placeholders."""
+        """Replaces real names/emails with randomized synthetic placeholders and applies guardrails."""
+        if self.guardrail:
+            text = self.guardrail.sanitize(text)
+
         # Replace email addresses
         text = re.sub(r"[\w\.-]+@[\w\.-]+\.\w+", "contact@company.internal", text)
         # Replace phone numbers

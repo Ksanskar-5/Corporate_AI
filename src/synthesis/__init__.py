@@ -3,6 +3,7 @@ src/synthesis — Local Synthetic Data Generation Engine
 """
 
 from .synthesizer_pipeline import run_pipeline
+from .confidentiality import ConfidentialityGuardrail
 from .structured_db import (
     insert_synthesized_records,
     query_synthesized_records,
@@ -14,6 +15,7 @@ from .ollama_client import query_ollama, is_ollama_available
 
 __all__ = [
     "run_pipeline",
+    "ConfidentialityGuardrail",
     "insert_synthesized_records",
     "query_synthesized_records",
     "get_structured_stats",
