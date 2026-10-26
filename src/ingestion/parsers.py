@@ -101,7 +101,12 @@ def parse_json(
 ) -> list[dict]:
     """Parses a JSON or JSONL file into canonical document records."""
     is_jsonl = file_path.endswith(".jsonl")
-    df = pd.read_json(file_path, lines=is_jsonl, nrows=sample_size)
+    if is_jsonl:
+        df = pd.read_json(file_path, lines=True, nrows=sample_size)
+    else:
+        df = pd.read_json(file_path)
+        if sample_size and not df.empty:
+            df = df.head(sample_size)
     if df.empty:
         return []
 

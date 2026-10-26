@@ -1,26 +1,14 @@
 """
-src/synthesis — Local Synthetic Data Generation Engine
+src/synthesis — Simple Batch JSON LLM Synthesis Engine
 """
 
-from .synthesizer_pipeline import run_pipeline
-from .confidentiality import ConfidentialityGuardrail
-from .structured_db import (
-    insert_synthesized_records,
-    query_synthesized_records,
-    get_structured_stats,
-    STRUCTURED_DB_PATH,
-)
-from .schema_analyst import analyze_schema_with_ollama
-from .ollama_client import query_ollama, is_ollama_available
+from .engine import synthesize_batch, synthesize_from_file
+from .db import get_synthetic_records, get_synthetic_stats, get_connection
 
 __all__ = [
-    "run_pipeline",
-    "ConfidentialityGuardrail",
-    "insert_synthesized_records",
-    "query_synthesized_records",
-    "get_structured_stats",
-    "analyze_schema_with_ollama",
-    "query_ollama",
-    "is_ollama_available",
-    "STRUCTURED_DB_PATH",
+    "synthesize_batch",
+    "synthesize_from_file",
+    "get_synthetic_records",
+    "get_synthetic_stats",
+    "get_connection",
 ]

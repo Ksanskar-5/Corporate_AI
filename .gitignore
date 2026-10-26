@@ -3,18 +3,28 @@
 *.zip
 *.pdf
 *.duckdb
-data/*.duckdb
 *.db
 *.sqlite
 *.jsonl
-data/synthetic/*
-!data/synthetic/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
-data/raw/*
-!data/raw/.gitkeep
+*.parquet
 
-# Python
+# Data directories (keep directory structure with .gitkeep)
+data/*
+!data/.gitkeep
+!data/raw/
+!data/raw/.gitkeep
+!data/processed/
+!data/processed/.gitkeep
+!data/synthetic/
+!data/synthetic/.gitkeep
+
+# One-time extraction scripts
+extract_*.py
+
+# Large datasets
+enron_data_fraud_labeled*.csv
+
+# Python caches and bytecode
 __pycache__/
 *.py[cod]
 *$py.class
@@ -33,20 +43,18 @@ env/
 # Jupyter
 .ipynb_checkpoints/
 
-# IDE
+# IDE & OS
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# OS
 .DS_Store
 Thumbs.db
 
-# Outputs (regenerable)
-outputs/models/*.pt
-outputs/models/*.pkl
-outputs/synthetic_data/*.csv
+# Logs
+*.log
 
 # Docker
 .dockerignore
+
+AGENTS.md
