@@ -5,6 +5,7 @@ Converts any file format into a standard canonical document structure.
 
 import os
 import uuid
+import hashlib
 import pandas as pd
 import pypdf
 
@@ -18,6 +19,20 @@ TEXT_CANDIDATES = [
 TITLE_CANDIDATES = [
     "subject", "title", "summary", "topic", "ticket_title", "header"
 ]
+
+
+def _safe_val(v):
+    """Safely extracts dataframe cell values, handling nested dicts/lists without pd.isna crashing."""
+    try:
+        return None if pd.isna(v) else v
+    except (ValueError, TypeError):
+        return str(v)
+
+
+def _make_doc_id(data_type: str, source_file: str, idx: int, text: str) -> str:
+    """Generates unique, collision-resistant doc_ids using an MD5 digest prefix."""
+    text_hash = hashlib.md5(text.encode("utf-8", errors="ignore")).hexdigest()[:6]
+    return f"{data_type}_{source_file}_{int(idx) + 1}_{text_hash}"
 
 
 def _auto_detect_column(columns: list, candidates: list) -> str:
@@ -66,29 +81,24 @@ def parse_csv(
 
     docs = []
     for idx, row in df.iterrows():
-        primary_text = str(row[text_column]) if pd.notnull(row[text_column]) else ""
+        body_text = str(row[text_column]) if pd.notnull(row[text_column]) else ""
         title = str(row[title_column]) if title_column and pd.notnull(row[title_column]) else f"{source_file} #{idx + 1}"
 
-        # Collect all remaining columns into attributes
+        # Collect all remaining columns into attributes safely
         attributes = {}
         for c in metadata_cols:
-            val = row[c]
-            if pd.isna(val):
-                attributes[c] = None
-            elif isinstance(val, (int, float, bool, str)):
-                attributes[c] = val
-            else:
-                attributes[c] = str(val)
+            attributes[c] = _safe_val(row[c])
 
-        doc_id = f"{data_type}_{source_file}_{idx + 1}"
+        doc_id = _make_doc_id(data_type, source_file, idx, body_text)
         docs.append({
             "doc_id": doc_id,
             "source_file": source_file,
+            "file_type": "csv",
             "data_type": data_type,
             "title": title,
-            "primary_text": primary_text,
+            "body_text": body_text,
             "attributes": attributes,
-            "token_count": len(primary_text.split()),
+            "token_count": len(body_text.split()),
         })
 
     return docs
@@ -121,19 +131,21 @@ def parse_json(
 
     docs = []
     for idx, row in df.iterrows():
-        primary_text = str(row[text_column]) if pd.notnull(row[text_column]) else ""
-        title = str(row[title_column]) if title_column and pd.notnull(row[title_column]) else f"{source_file} #{idx + 1}"
+        body_text = str(row[text_column]) if pd.notnull(row[text_column]) else ""
+        title = str(row[title_column]) if title_column and pd.notnull(row[title_column]) else f"{source_file} #{str(idx)}"
 
-        attributes = {c: (None if pd.isna(row[c]) else row[c]) for c in metadata_cols}
+        attributes = {c: _safe_val(row[c]) for c in metadata_cols}
 
+        doc_id = _make_doc_id(data_type, source_file, idx, body_text)
         docs.append({
-            "doc_id": f"{data_type}_{source_file}_{idx + 1}",
+            "doc_id": doc_id,
             "source_file": source_file,
+            "file_type": "jsonl" if is_jsonl else "json",
             "data_type": data_type,
             "title": title,
-            "primary_text": primary_text,
+            "body_text": body_text,
             "attributes": attributes,
-            "token_count": len(primary_text.split()),
+            "token_count": len(body_text.split()),
         })
 
     return docs
@@ -160,19 +172,22 @@ def parse_pdf(file_path: str) -> list[dict]:
             continue
 
         page_num = page_idx + 1
+        clean_text = page_text.strip()
+        doc_id = _make_doc_id("document_pdf", source_file, page_idx, clean_text)
         docs.append({
-            "doc_id": f"pdf_{source_file}_p{page_num}",
+            "doc_id": doc_id,
             "source_file": source_file,
+            "file_type": "pdf",
             "data_type": "document_pdf",
             "title": f"{doc_title} (Page {page_num})",
-            "primary_text": page_text.strip(),
+            "body_text": clean_text,
             "attributes": {
                 "document_title": doc_title,
                 "page_number": page_num,
                 "total_pages": total_pages,
                 "author": author,
             },
-            "token_count": len(page_text.split()),
+            "token_count": len(clean_text.split()),
         })
 
     return docs
@@ -181,6 +196,7 @@ def parse_pdf(file_path: str) -> list[dict]:
 def parse_text(file_path: str) -> list[dict]:
     """Parses plain text (.txt) or markdown (.md) into a canonical document."""
     source_file = os.path.basename(file_path)
+    ext = os.path.splitext(source_file)[1].lstrip(".").lower()
     with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
         content = f.read().strip()
 
@@ -191,12 +207,14 @@ def parse_text(file_path: str) -> list[dict]:
     first_line = content.split("\n")[0].strip("# ")
     title = first_line if len(first_line) < 100 else os.path.splitext(source_file)[0]
 
+    doc_id = _make_doc_id("meeting_note", source_file, 0, content)
     return [{
-        "doc_id": f"text_{source_file}",
+        "doc_id": doc_id,
         "source_file": source_file,
+        "file_type": ext or "txt",
         "data_type": "meeting_note",
         "title": title,
-        "primary_text": content,
+        "body_text": content,
         "attributes": {
             "file_size_bytes": os.path.getsize(file_path),
             "line_count": len(content.splitlines()),

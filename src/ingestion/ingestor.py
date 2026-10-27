@@ -14,9 +14,12 @@ def ingest_file(
     sample_size: int = None,
     text_col: str = None,
     title_col: str = None,
+    department: str = None,
+    allowed_roles: list[str] = None,
+    clearance_level: str = None,
 ) -> dict:
     """
-    Ingests a single file into the unified DuckDB vault.
+    Ingests a single file into the unified DuckDB vault with RBAC attributes.
 
     Parameters
     ----------
@@ -28,6 +31,12 @@ def ingest_file(
         Manually override the primary text column name if needed.
     title_col : str, optional
         Manually override the title/subject column name if needed.
+    department : str, optional
+        Corporate department responsible for this data (e.g. 'Engineering', 'Trading').
+    allowed_roles : list[str], optional
+        Roles authorized to access this data (e.g. ['Executive', 'Department_Manager'] or ['All']).
+    clearance_level : str, optional
+        Clearance classification ('Public', 'Internal', 'Confidential', 'Restricted').
 
     Returns
     -------
@@ -58,28 +67,51 @@ def ingest_file(
             "records_ingested": 0,
         }
 
+    # Attach RBAC attributes if specified at ingestion time
+    for doc in documents:
+        if department:
+            doc["department"] = department
+        if allowed_roles:
+            doc["allowed_roles"] = allowed_roles
+        if clearance_level:
+            doc["clearance_level"] = clearance_level
+
     # Save documents into the unified DuckDB vault
     inserted_count = save_documents(documents)
     vault_summary = get_vault_stats()
 
+    first_text = documents[0].get("body_text", "")
     return {
         "status": "success",
         "file": os.path.basename(file_path),
         "data_type": documents[0]["data_type"],
         "records_ingested": inserted_count,
         "sample_title": documents[0]["title"],
-        "sample_preview": documents[0]["primary_text"][:120],
+        "sample_preview": first_text[:120],
         "vault_total": vault_summary["total_documents"],
-        "vault_breakdown": vault_summary["breakdown"],
+        "vault_breakdown": vault_summary["data_type_breakdown"],
+        "clearance_breakdown": vault_summary["clearance_breakdown"],
     }
 
 
-def ingest_files(file_paths: list[str], sample_size: int = None) -> list[dict]:
+def ingest_files(
+    file_paths: list[str],
+    sample_size: int = None,
+    department: str = None,
+    allowed_roles: list[str] = None,
+    clearance_level: str = None,
+) -> list[dict]:
     """Ingests a list of different files all into the same unified vault."""
     results = []
     for path in file_paths:
         try:
-            res = ingest_file(path, sample_size=sample_size)
+            res = ingest_file(
+                path,
+                sample_size=sample_size,
+                department=department,
+                allowed_roles=allowed_roles,
+                clearance_level=clearance_level,
+            )
             results.append(res)
         except Exception as e:
             results.append({

@@ -67,8 +67,8 @@ def extract_synthesis_records(
     conn = get_connection(db_path)
     try:
         query = """
-            SELECT doc_id, data_type, title, primary_text, attributes, token_count
-            FROM unified_vault
+            SELECT doc_id, data_type, title, body_text, attributes, token_count
+            FROM documents
             WHERE token_count >= ?
         """
         params = [min_word_count]
@@ -106,7 +106,7 @@ def extract_synthesis_records(
         records.append({
             "doc_id": row["doc_id"],
             "data_type": row["data_type"],
-            "target_text": str(row["primary_text"]).strip(),
+            "target_text": str(row["body_text"]).strip(),
             "conditioning_prompt": str(row["title"]).strip(),
             "context": clean_context,
             "token_count": int(row["token_count"]),

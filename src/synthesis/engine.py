@@ -17,6 +17,7 @@ import json
 import random
 import urllib.request
 import urllib.error
+from datetime import date, timedelta
 from .db import save_synthetic_batch, get_synthetic_stats, get_synthetic_records
 from ..ingestion.vault import get_connection as get_vault_conn
 from ..ingestion.parsers import parse_csv, parse_json, parse_pdf, parse_text
@@ -34,6 +35,18 @@ ENTERPRISE_DEPARTMENTS = [
     "Executive Leadership",
     "Customer Support & Success",
 ]
+
+
+def _random_timestamp() -> str:
+    """Generates a realistic enterprise timestamp within the 2000-2002 corporate timeline."""
+    start = date(2000, 1, 1)
+    end = date(2002, 12, 31)
+    delta_days = (end - start).days
+    random_day = start + timedelta(days=random.randint(0, delta_days))
+    hour = random.randint(7, 19)
+    minute = random.randint(0, 59)
+    second = random.randint(0, 59)
+    return f"{random_day} {hour:02d}:{minute:02d}:{second:02d}"
 
 
 def _call_ollama_batch(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 90) -> list[dict]:
@@ -66,33 +79,21 @@ def _call_ollama_batch(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 9
         return []
 
 
+from .sanitizer import sanitize_enterprise_text
+
+
 def _apply_user_constraints(
     text: str,
     forbidden_terms: list[str] = None,
     custom_replacements: dict = None,
 ) -> str:
-    """Applies user redactions and custom aliases to generated text."""
-    if not text:
-        return ""
-
-    # 1. Custom replacements (e.g. "Enron" -> "ApexGlobal")
-    if custom_replacements:
-        for secret, alias in custom_replacements.items():
-            if secret:
-                pattern = rf"\b{re.escape(secret)}\b" if secret.isalnum() else re.escape(secret)
-                text = re.sub(pattern, alias, text, flags=re.IGNORECASE)
-
-    # 2. Redact forbidden terms with word boundaries
-    if forbidden_terms:
-        for term in forbidden_terms:
-            if term:
-                pattern = rf"\b{re.escape(term)}\b" if term.isalnum() else re.escape(term)
-                text = re.sub(pattern, "[REDACTED]", text, flags=re.IGNORECASE)
-
-    # 3. Clean any residual real emails or phone numbers
-    text = re.sub(r"[a-zA-Z0-9._%+-]+@enron\.com", "employee@company.internal", text, flags=re.IGNORECASE)
-    text = re.sub(r"\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b", "555-0199", text)
-    return text
+    """Applies entity-preserving semantic anonymization and persona mapping to generated text."""
+    return sanitize_enterprise_text(
+        text=text,
+        forbidden_terms=forbidden_terms,
+        custom_replacements=custom_replacements,
+        normalize_financials=True,
+    )
 
 
 def _get_type_guidance(data_type: str) -> tuple[str, str, str]:
@@ -144,7 +145,7 @@ def _build_synthesis_prompt(
     has_exec = False
     for item in reference_items[:batch_size]:
         t = item.get("title") or item.get("subject") or "Operations"
-        snippet = (item.get("primary_text") or item.get("content") or item.get("body") or "")[:120]
+        snippet = (item.get("body_text") or item.get("primary_text") or item.get("content") or item.get("body") or "")[:120]
         ref_summaries.append(f"- Topic: {t} | Context: {snippet}")
         if item.get("compliance_label", 0) == 1:
             has_audit_risk = True
@@ -181,8 +182,8 @@ Respond ONLY with a JSON object in this exact structure:
       "content": "Detailed 2-3 paragraph enterprise text detailing the ongoing company process, status, and decisions",
       "data_type": "{data_type}",
       "department": "One of: Legal & Regulatory Compliance, Trading & Risk Management, Corporate Operations, Engineering & IT Systems, Finance & Accounting Audit, Executive Leadership",
-      "author_or_sender": "first.last@company.internal or Department Lead",
-      "recipient_or_audience": "first.last@company.internal or All Employees",
+      "author": "first.last@company.internal or Department Lead",
+      "recipient": "first.last@company.internal or All Employees",
       "compliance_label": 0,
       "is_executive": false
     }}
@@ -203,7 +204,7 @@ def _generate_fallback_records(
     for i in range(batch_size):
         ref = reference_items[i] if i < len(reference_items) else {}
         base_title = ref.get("title") or ref.get("subject") or f"Enterprise Review #{i+1}"
-        base_text = ref.get("primary_text") or ref.get("content") or ref.get("body") or "Standard ongoing enterprise workflow."
+        base_text = ref.get("body_text") or ref.get("primary_text") or ref.get("content") or ref.get("body") or "Standard ongoing enterprise workflow."
         first_clause = base_text.split(".")[0] if "." in base_text else base_text[:120]
 
         dept = random.choice(ENTERPRISE_DEPARTMENTS)
@@ -211,12 +212,13 @@ def _generate_fallback_records(
         is_exec = ref.get("is_executive", False) or ("executive" in dept.lower())
 
         records.append({
+            "source_doc_id": ref.get("doc_id"),
             "title": f"Synthetic Process: {base_title[:60]}",
             "content": f"Operational Process Review regarding {base_title}. Context: {first_clause.strip()}. All associated enterprise procedures, documentation, and compliance checkpoints have been audited in accordance with {dept} protocols.",
             "data_type": data_type,
             "department": dept,
-            "author_or_sender": f"lead.{dept.split()[0].lower()}@company.internal",
-            "recipient_or_audience": "corporate-audit@company.internal" if is_risk else "operations-team@company.internal",
+            "author": f"lead.{dept.split()[0].lower()}@company.internal",
+            "recipient": "corporate-audit@company.internal" if is_risk else "operations-team@company.internal",
             "compliance_label": 1 if is_risk else 0,
             "is_executive": is_exec,
         })
@@ -234,23 +236,23 @@ def synthesize_batch(
 ) -> dict:
     """
     Synthesizes a single batch of records for any data_type using Ollama or fallback,
-    referencing samples from unified_vault, and saving into synthetic_database.duckdb.
+    referencing samples from documents table in vault, and saving into synthetic_database.duckdb.
     """
     # Grab reference samples from vault if available
     vault_conn = get_vault_conn()
     try:
         if data_type and data_type != "general":
             sample_rows = vault_conn.execute(
-                "SELECT title, primary_text, data_type, attributes FROM unified_vault WHERE data_type = ? LIMIT ?;",
+                "SELECT doc_id, title, body_text, data_type, attributes FROM documents WHERE data_type = ? LIMIT ?;",
                 [data_type, batch_size],
             ).fetchall()
         else:
             sample_rows = vault_conn.execute(
-                "SELECT title, primary_text, data_type, attributes FROM unified_vault LIMIT ?;",
+                "SELECT doc_id, title, body_text, data_type, attributes FROM documents LIMIT ?;",
                 [batch_size],
             ).fetchall()
 
-        reference_items = [{"title": r[0], "primary_text": r[1], "data_type": r[2]} for r in sample_rows]
+        reference_items = [{"doc_id": r[0], "title": r[1], "body_text": r[2], "data_type": r[3]} for r in sample_rows]
     finally:
         vault_conn.close()
 
@@ -283,16 +285,21 @@ def synthesize_batch(
     for r in raw_records:
         title = _apply_user_constraints(r.get("title") or r.get("subject", ""), forbidden_terms, custom_replacements)
         content = _apply_user_constraints(r.get("content") or r.get("body", ""), forbidden_terms, custom_replacements)
+        author = r.get("author") or r.get("author_or_sender") or r.get("sender", "employee@company.internal")
+        recipient = r.get("recipient") or r.get("recipient_or_audience") or r.get("recipient", "team@company.internal")
+
         cleaned_records.append({
+            "source_doc_id": r.get("source_doc_id"),
             "data_type": r.get("data_type", data_type),
             "title": title,
             "content": content,
             "department": r.get("department", "Corporate Operations"),
-            "author_or_sender": r.get("author_or_sender") or r.get("sender", "employee@company.internal"),
-            "recipient_or_audience": r.get("recipient_or_audience") or r.get("recipient", "team@company.internal"),
-            "timestamp": "2024-03-15 10:00:00",
+            "author": author,
+            "recipient": recipient,
+            "timestamp": _random_timestamp(),
             "compliance_label": int(r.get("compliance_label", 0)),
             "is_executive": bool(r.get("is_executive", False)),
+            "metadata": r.get("metadata", {}),
         })
 
     saved_count = save_synthetic_batch(cleaned_records)
@@ -317,6 +324,8 @@ def synthesize_from_file(
     forbidden_terms: list[str] = None,
     custom_replacements: dict = None,
     additional_context: str = None,
+    allowed_roles: list[str] = None,
+    clearance_level: str = None,
     use_ollama: bool = True,
     model: str = DEFAULT_MODEL,
 ) -> dict:
@@ -324,7 +333,7 @@ def synthesize_from_file(
     Universal Synthesis from ANY File Format:
     Parses CSV, JSON/JSONL, PDF, TXT, or MD into canonical enterprise documents,
     extracts the ongoing business processes and workflows, and synthesizes clean,
-    privacy-protected records into data/synthetic_database.duckdb.
+    privacy-protected records into data/synthetic_database.duckdb with explicit access roles.
     """
     if not os.path.exists(source_file):
         raise FileNotFoundError(f"Source file not found: {source_file}")
@@ -384,7 +393,7 @@ def synthesize_from_file(
         if not raw_records:
             raw_records = _generate_fallback_records(chunk_docs, detected_type, len(chunk_docs))
 
-        # Clean, redact, and prepare records
+        # Clean, redact, and prepare records with access controls
         cleaned_batch = []
         for i, r in enumerate(raw_records):
             fallback_doc = chunk_docs[i] if i < len(chunk_docs) else {}
@@ -401,6 +410,7 @@ def synthesize_from_file(
                 or r.get("body")
                 or r.get("description")
                 or r.get("text")
+                or fallback_doc.get("body_text")
                 or fallback_doc.get("primary_text")
                 or ""
             )
@@ -408,18 +418,28 @@ def synthesize_from_file(
             title = _apply_user_constraints(raw_title, forbidden_terms, custom_replacements)
             content = _apply_user_constraints(raw_content, forbidden_terms, custom_replacements)
             dept = r.get("department") or fallback_doc.get("attributes", {}).get("department", "Corporate Operations")
+            author = r.get("author") or r.get("author_or_sender") or r.get("sender", "employee@company.internal")
+            recipient = r.get("recipient") or r.get("recipient_or_audience") or r.get("recipient", "team@company.internal")
 
-            cleaned_batch.append({
+            record_entry = {
+                "source_doc_id": fallback_doc.get("doc_id"),
                 "data_type": r.get("data_type", detected_type),
                 "title": title,
                 "content": content,
                 "department": dept,
-                "author_or_sender": r.get("author_or_sender") or r.get("sender", "employee@company.internal"),
-                "recipient_or_audience": r.get("recipient_or_audience") or r.get("recipient", "team@company.internal"),
-                "timestamp": "2024-03-15 10:00:00",
+                "author": author,
+                "recipient": recipient,
+                "timestamp": _random_timestamp(),
                 "compliance_label": int(r.get("compliance_label", 0)),
                 "is_executive": bool(r.get("is_executive", False)),
-            })
+                "metadata": fallback_doc.get("attributes", {}),
+            }
+            if allowed_roles:
+                record_entry["allowed_roles"] = allowed_roles
+            if clearance_level:
+                record_entry["clearance_level"] = clearance_level
+
+            cleaned_batch.append(record_entry)
 
         save_synthetic_batch(cleaned_batch)
         total_generated += len(cleaned_batch)
@@ -454,7 +474,7 @@ def synthesize_from_vault(
     model: str = DEFAULT_MODEL,
 ) -> dict:
     """
-    Synthesizes across ALL files and data types currently in the unified vault,
+    Synthesizes across ALL files and data types currently in the documents vault,
     giving the AI agent a unified, privacy-safe 360-degree knowledge base of
     all ongoing enterprise processes.
     """
@@ -462,12 +482,12 @@ def synthesize_from_vault(
     try:
         if data_type:
             rows = vault_conn.execute(
-                "SELECT doc_id, source_file, data_type, title, primary_text, attributes FROM unified_vault WHERE data_type = ? LIMIT ?;",
+                "SELECT doc_id, source_file, data_type, title, body_text, attributes FROM documents WHERE data_type = ? LIMIT ?;",
                 [data_type, n_records],
             ).fetchall()
         else:
             rows = vault_conn.execute(
-                "SELECT doc_id, source_file, data_type, title, primary_text, attributes FROM unified_vault LIMIT ?;",
+                "SELECT doc_id, source_file, data_type, title, body_text, attributes FROM documents LIMIT ?;",
                 [n_records],
             ).fetchall()
 
@@ -477,7 +497,7 @@ def synthesize_from_vault(
                 "source_file": r[1],
                 "data_type": r[2],
                 "title": r[3],
-                "primary_text": r[4],
+                "body_text": r[4],
                 "attributes": json.loads(r[5]) if isinstance(r[5], str) else r[5],
             }
             for r in rows
@@ -487,6 +507,18 @@ def synthesize_from_vault(
 
     if not docs:
         return {"status": "empty", "message": "Unified vault is empty. Ingest files first."}
+
+    # Format user constraints once
+    constraints_prompt = []
+    if forbidden_terms:
+        constraints_prompt.append(f"STRICTLY FORBIDDEN WORDS: {', '.join(forbidden_terms)}")
+    if custom_replacements:
+        rep_str = ", ".join([f"'{k}' -> '{v}'" for k, v in custom_replacements.items()])
+        constraints_prompt.append(f"MANDATORY ALIASES: {rep_str}")
+    if additional_context:
+        constraints_prompt.append(f"USER FOCUS / PROCESS DIRECTIVE: {additional_context}")
+
+    user_rules_text = "\n".join(constraints_prompt) if constraints_prompt else "Ensure professional enterprise tone."
 
     # Group by data_type and synthesize each group
     grouped = {}
@@ -499,7 +531,7 @@ def synthesize_from_vault(
         n_chunks = (len(group_docs) + batch_chunk_size - 1) // batch_chunk_size
         for c in range(n_chunks):
             sub_chunk = group_docs[c * batch_chunk_size : (c + 1) * batch_chunk_size]
-            prompt = _build_synthesis_prompt(dt, sub_chunk, len(sub_chunk), additional_context or "")
+            prompt = _build_synthesis_prompt(dt, sub_chunk, len(sub_chunk), user_rules_text)
             raw = []
             if use_ollama:
                 try:
@@ -510,17 +542,25 @@ def synthesize_from_vault(
                 raw = _generate_fallback_records(sub_chunk, dt, len(sub_chunk))
 
             batch_to_save = []
-            for r in raw:
+            for i, r in enumerate(raw):
+                parent_doc = sub_chunk[i] if i < len(sub_chunk) else {}
+                title = _apply_user_constraints(r.get("title") or r.get("subject", ""), forbidden_terms, custom_replacements)
+                content = _apply_user_constraints(r.get("content") or r.get("body", ""), forbidden_terms, custom_replacements)
+                author = r.get("author") or r.get("author_or_sender") or r.get("sender", "employee@company.internal")
+                recipient = r.get("recipient") or r.get("recipient_or_audience") or r.get("recipient", "team@company.internal")
+
                 batch_to_save.append({
+                    "source_doc_id": parent_doc.get("doc_id"),
                     "data_type": dt,
-                    "title": _apply_user_constraints(r.get("title") or r.get("subject", ""), forbidden_terms, custom_replacements),
-                    "content": _apply_user_constraints(r.get("content") or r.get("body", ""), forbidden_terms, custom_replacements),
+                    "title": title,
+                    "content": content,
                     "department": r.get("department", "Corporate Operations"),
-                    "author_or_sender": r.get("author_or_sender") or r.get("sender", "employee@company.internal"),
-                    "recipient_or_audience": r.get("recipient_or_audience") or r.get("recipient", "team@company.internal"),
-                    "timestamp": "2024-03-15 10:00:00",
+                    "author": author,
+                    "recipient": recipient,
+                    "timestamp": _random_timestamp(),
                     "compliance_label": int(r.get("compliance_label", 0)),
                     "is_executive": bool(r.get("is_executive", False)),
+                    "metadata": parent_doc.get("attributes", {}),
                 })
             save_synthetic_batch(batch_to_save)
             total_saved += len(batch_to_save)
