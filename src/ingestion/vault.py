@@ -1,5 +1,5 @@
 """
-vault.py — DuckDB Storage Manager for the Unified Data Vault with Role-Based Access Control (RBAC).
+vault.py - DuckDB Storage Manager for the Unified Data Vault with Role-Based Access Control (RBAC).
 Stores all ingested enterprise data (emails, tickets, PDFs, notes) in a local file with
 explicit department, allowed_roles, and clearance_level security attributes.
 """
@@ -85,9 +85,9 @@ def save_documents(documents: list[dict], db_path: str = DEFAULT_VAULT_PATH) -> 
 
         if not roles:
             if is_exec:
-                roles = "Executive,Compliance_Auditor"
+                roles = "Admin"
             elif comp_flag == 1:
-                roles = "Compliance_Auditor,Executive"
+                roles = "Admin,Analyst,Manager"
             else:
                 roles = "All"
         elif isinstance(roles, list):
@@ -178,7 +178,7 @@ def get_vault_stats(db_path: str = DEFAULT_VAULT_PATH) -> dict:
 
 def query_vault(
     data_type: str = None,
-    user_role: str = "Executive",
+    user_role: str = "Employee",
     user_department: str = None,
     limit: int = 10,
     db_path: str = DEFAULT_VAULT_PATH,
@@ -186,11 +186,12 @@ def query_vault(
     """
     Queries documents from the vault enforcing Role-Based Access Control (RBAC).
 
-    RBAC Policy:
-    - General_Employee: Can ONLY access clearance_level in ('Public', 'Internal') and allowed_roles containing 'All'.
-    - Department_Manager: Can access own department records + Corporate Operations up to 'Confidential'.
-    - Compliance_Auditor: Can access all departments, audit investigations, and risk files.
-    - Executive: Full unrestricted visibility across all departments and 'Restricted' files.
+    RBAC Policy (canonical roles: Employee, Manager, Analyst, Admin):
+    - Employee: Can ONLY access clearance_level in ('Public', 'Internal') and allowed_roles containing 'All'.
+    - Manager: Can access own department records + Corporate Operations up to 'Confidential'.
+    - Analyst: Can access all departments, audit investigations, and risk files.
+    - Admin: Full unrestricted visibility across all departments and 'Restricted' files.
+    Unknown roles fail closed to Employee.
     """
     conn = get_connection(db_path)
     try:
@@ -201,14 +202,17 @@ def query_vault(
             where_clauses.append("data_type = ?")
             params.append(data_type)
 
-        # Enforce RBAC filtering at SQL layer
-        if user_role == "General_Employee":
-            where_clauses.append("clearance_level IN ('Public', 'Internal') AND allowed_roles LIKE '%All%'")
-        elif user_role == "Department_Manager":
+        # Enforce RBAC filtering at SQL layer; fail closed to Employee.
+        if user_role == "Manager":
             dept = user_department or "Corporate Operations"
             where_clauses.append("clearance_level IN ('Public', 'Internal', 'Confidential') AND (department = ? OR department = 'Corporate Operations')")
             params.append(dept)
-        # Executive and Compliance_Auditor have global access
+        elif user_role == "Analyst":
+            where_clauses.append("clearance_level IN ('Public', 'Internal', 'Confidential', 'Restricted')")
+        elif user_role == "Admin":
+            pass
+        else:
+            where_clauses.append("clearance_level IN ('Public', 'Internal') AND allowed_roles LIKE '%All%'")
 
         where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
         query_sql = f"""

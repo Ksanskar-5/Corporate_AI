@@ -1,10 +1,11 @@
 """
-parsers.py — Simple, readable parsers for enterprise files (CSV, JSON, PDF, TXT).
+parsers.py - Simple, readable parsers for enterprise files (CSV, JSON, PDF, TXT).
 Converts any file format into a standard canonical document structure.
 """
 
 import os
 import uuid
+import json
 import hashlib
 import pandas as pd
 import pypdf
@@ -42,6 +43,37 @@ def _auto_detect_column(columns: list, candidates: list) -> str:
         if candidate in col_map:
             return col_map[candidate]
     return None
+
+
+def _flatten_json_value(v, max_len: int = 400) -> str:
+    """Renders a scalar, list, or dict cell as short readable text."""
+    if v is None:
+        return ""
+    try:
+        if pd.isna(v):
+            return ""
+    except (ValueError, TypeError):
+        pass
+    if isinstance(v, (dict, list)):
+        text = json.dumps(v, ensure_ascii=False)
+    else:
+        text = str(v)
+    return text[:max_len]
+
+
+def _record_to_text(row, columns: list) -> str:
+    """Renders a whole record as readable 'Key: value' lines.
+
+    Used when no recognized body-text column exists (e.g. single-object
+    JSON profiles), so facts stay in body_text instead of hiding in
+    attributes the index never embeds.
+    """
+    lines = []
+    for c in columns:
+        text = _flatten_json_value(row[c]).strip()
+        if text:
+            lines.append(f"{c}: {text}")
+    return "\n".join(lines)
 
 
 def _infer_data_type(columns: list, file_ext: str) -> str:
@@ -123,15 +155,24 @@ def parse_json(
     source_file = os.path.basename(file_path)
     columns = df.columns.tolist()
 
-    text_column = text_col or _auto_detect_column(columns, TEXT_CANDIDATES) or columns[0]
+    text_column = text_col or _auto_detect_column(columns, TEXT_CANDIDATES)
     title_column = _auto_detect_column(columns, TITLE_CANDIDATES)
     data_type = _infer_data_type(columns, ".json")
+
+    # No recognized body-text field (e.g. single-object JSON profiles):
+    # render the whole record as readable text so facts stay searchable.
+    render_whole_record = text_column is None
+    if render_whole_record:
+        text_column = columns[0]
 
     metadata_cols = [c for c in columns if c != text_column]
 
     docs = []
     for idx, row in df.iterrows():
-        body_text = str(row[text_column]) if pd.notnull(row[text_column]) else ""
+        if render_whole_record:
+            body_text = _record_to_text(row, columns)
+        else:
+            body_text = str(row[text_column]) if pd.notnull(row[text_column]) else ""
         title = str(row[title_column]) if title_column and pd.notnull(row[title_column]) else f"{source_file} #{str(idx)}"
 
         attributes = {c: _safe_val(row[c]) for c in metadata_cols}

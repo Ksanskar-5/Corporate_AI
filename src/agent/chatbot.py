@@ -1,7 +1,8 @@
 """
-chatbot.py — LangChain RAG Chatbot with Role-Based Access Control (RBAC)
-Queries vector embeddings of synthetic enterprise data in Chroma DB with strict pre-retrieval
-clearance filters and generates verified corporate responses with citations using Google Gemini.
+chatbot.py - LangChain RAG Chatbot with Role-Based Access Control (RBAC)
+Queries vector embeddings of synthetic enterprise data and non-synthetic vault records
+in Chroma DB with pre-retrieval clearance (Admin sees all data, other roles
+synthetic only, all formats), generating corporate responses with citations.
 """
 
 import os
@@ -10,27 +11,31 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.output_parsers import StrOutputParser
-from .vector_store import get_retriever, build_vector_store
+from .vector_store import get_retriever, build_vector_store, effective_source_scope
 
 load_dotenv()
 
-SYSTEM_PROMPT = """You are the Corporate AI Assistant, an internal enterprise copilot.
+SYSTEM_PROMPT = """You are the Corporate AI Assistant, an internal enterprise copilot and data management intelligence hub.
 Your job is to answer employee, manager, and leadership questions about company operations,
-process reviews, ongoing projects, and compliance status.
+process reviews, ongoing projects, files, datasets, and compliance status.
 
 CURRENT USER IDENTITY & CLEARANCE:
 - User Role: {user_role}
 - Department: {user_department}
+- Knowledge Scope: {source_scope}
+- Format Filter: {file_type_filter}
 
-RETRIEVED ENTERPRISE CONTEXT (strictly filtered by RBAC pre-retrieval clearance):
+RETRIEVED ENTERPRISE CONTEXT (strictly filtered by RBAC pre-retrieval clearance and user filters):
 {context}
 
 STRICT OPERATIONAL RULES:
-1. Ground your answers ONLY in the retrieved enterprise context above. Do not hallucinate or invent company details.
-2. If no matching records were retrieved, politely inform the user: "No authorized records were found within your clearance level."
-3. Always cite the Record ID (e.g. `[Record: synth_xxxx]`) and Department when referencing information.
-4. Maintain a professional, clear, executive tone.
-5. If the user asks about compliance, security, or audit issues, explicitly highlight any records flagged with an audit requirement (`compliance_label == 1`).
+1. Use ONLY the retrieved enterprise context above. Never use outside knowledge, and never invent company details.
+2. If the retrieved records do not directly contain the answer to the question - even if they mention related names or topics - do NOT guess, infer, or piece together an answer from hints. Reply with exactly this sentence and nothing else: "This information is not provided in the available records yet."
+3. If no records were retrieved at all, reply with exactly this sentence and nothing else: "This information is not provided in the available records yet."
+4. Never present uncertain things as facts. Do not use "likely", "probably", "appears to be", "suggests", or "may be" to smuggle in guesses. If you are not sure, follow rule 2 and abstain.
+5. Keep language simple: short sentences, plain everyday words, no jargon.
+6. When the records DO directly answer the question, answer briefly and cite the Record ID, Document Format (e.g. `[PDF]`, `[MD]`, `[CSV]`, `[TXT]`), Data Source (`[Synthetic]` or `[Vault]`), and Department for each fact. Claim only what the cited record actually states.
+7. If the user asks about compliance, security, or audit issues, explicitly highlight any records flagged with an audit requirement (`compliance_label == 1`).
 """
 
 SUPPORTED_ROLES = [
@@ -44,7 +49,8 @@ SUPPORTED_ROLES = [
 class CorporateChatbot:
     """
     Role-Aware RAG Chatbot using Chroma DB vector retrieval and Google Gemini.
-    Enforces pre-retrieval data filtering so unauthorized records never enter LLM context.
+    Enforces pre-retrieval data filtering so unauthorized records never enter LLM context,
+    with flexible knowledge scoping (All, Synthetic, Vault) and format filters.
     """
 
     def __init__(
@@ -52,7 +58,7 @@ class CorporateChatbot:
         user_role: str = "Employee",
         user_department: str = None,
         api_key: str = None,
-        model: str = "gemini-2.5-flash",
+        model: str = None,
         temperature: float = 0.2,
         k: int = 4,
     ):
@@ -60,7 +66,7 @@ class CorporateChatbot:
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
         self.user_role = user_role if user_role in SUPPORTED_ROLES else "Employee"
         self.user_department = user_department or "Operations"
-        self.model = model
+        self.model = model or os.environ.get("GEMINI_MODEL") or "gemini-3.5-flash"
         self.k = k
         self.history = []
 
@@ -69,13 +75,6 @@ class CorporateChatbot:
                 "Gemini API key not found. Please set GEMINI_API_KEY in your .env file "
                 "or pass api_key to CorporateChatbot(api_key='...')."
             )
-
-        # Initialize vector retriever with strict RBAC pre-retrieval filtering
-        self.retriever = get_retriever(
-            k=self.k,
-            user_role=self.user_role,
-            user_department=self.user_department,
-        )
 
         # Initialize Gemini via LangChain
         self.llm = ChatGoogleGenerativeAI(
@@ -93,24 +92,30 @@ class CorporateChatbot:
         self.chain = self.prompt | self.llm | StrOutputParser()
 
     def set_user(self, user_role: str, user_department: str = None):
-        """Updates user role and rebinds the RBAC retriever."""
+        """Updates user role and clears history."""
         self.user_role = user_role if user_role in SUPPORTED_ROLES else "Employee"
         if user_department:
             self.user_department = user_department
-        self.retriever = get_retriever(
-            k=self.k,
-            user_role=self.user_role,
-            user_department=self.user_department,
-        )
         self.clear_history()
 
     def ask(self, question: str) -> dict:
         """
-        Retrieves authorized synthetic documents from Chroma DB,
-        invokes Gemini RAG chain, and returns the response with citations.
+        Retrieves authorized enterprise documents from Chroma DB, filtered by
+        user role clearance, invokes Gemini RAG chain, and returns the response
+        with interactive citations. Only Admin sees vault data; all other roles
+        are answered from synthetic data only. All document formats included.
         """
-        # Step 1: Retrieve matching documents (filtered by RBAC)
-        docs = self.retriever.invoke(question)
+        # Data source is derived from the role: no caller-chosen scope.
+        effective_scope = effective_source_scope(self.user_role, "all")
+        # Step 1: Initialize retriever with active filters and RBAC
+        retriever = get_retriever(
+            k=self.k,
+            user_role=self.user_role,
+            user_department=self.user_department,
+            source_scope=effective_scope,
+        )
+
+        docs = retriever.invoke(question)
 
         # Format retrieved docs into readable context string
         context_parts = []
@@ -119,15 +124,26 @@ class CorporateChatbot:
             meta = doc.metadata
             doc_id = meta.get("id", f"doc_{i}")
             dept = meta.get("department", "Corporate Operations")
+            src = meta.get("source", "synthetic")
+            ftype = meta.get("file_type", "txt").upper()
+            is_synth = meta.get("is_synthetic") in [True, "true", "True"]
+            comp_flag = int(meta.get("compliance_label", 0))
+            clearance = meta.get("clearance_level", "Internal")
+            title = meta.get("title", "Enterprise Record")
+
             sources.append({
                 "id": doc_id,
+                "title": title,
                 "department": dept,
-                "title": meta.get("title", "Enterprise Record"),
-                "compliance_label": meta.get("compliance_label", 0),
-                "clearance": meta.get("clearance_level", "Internal"),
+                "compliance_label": comp_flag,
+                "clearance": clearance,
+                "source": src,
+                "is_synthetic": is_synth,
+                "file_type": ftype.lower(),
+                "preview": doc.page_content[:200] + "...",
             })
             context_parts.append(
-                f"--- [Record {i}: ID `{doc_id}` | Dept: {dept} | Clearance: {meta.get('clearance_level', 'Internal')} | Risk Flag: {meta.get('compliance_label', 0)}] ---\n"
+                f"--- [Record {i}: ID `{doc_id}` | Source: {src.title()} | Format: {ftype} | Dept: {dept} | Clearance: {clearance} | Risk Flag: {comp_flag}] ---\n"
                 f"{doc.page_content}\n"
             )
 
@@ -145,6 +161,8 @@ class CorporateChatbot:
         answer = self.chain.invoke({
             "user_role": self.user_role,
             "user_department": self.user_department,
+            "source_scope": effective_scope.upper(),
+            "file_type_filter": "ALL",
             "context": context_str,
             "history": formatted_history,
             "question": question,
@@ -158,6 +176,8 @@ class CorporateChatbot:
             "answer": answer.strip(),
             "sources": sources,
             "user_role": self.user_role,
+            "source_scope": effective_scope,
+            "file_type_filter": "all",
             "raw_context": context_str,
         }
 
@@ -175,7 +195,8 @@ def run_chatbot():
     print("      CORPORATE AI CHATBOT (RAG with RBAC & Chroma DB)")
     print("=" * 65)
     print("Vector Store: Chroma DB (data/chroma_db)")
-    print("LLM Engine  : Google Gemini (gemini-2.5-flash)")
+    model_name = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
+    print(f"LLM Engine  : Google Gemini ({model_name})")
 
     if not api_key:
         print("\n[Notice] No GEMINI_API_KEY found in environment or .env file.")
@@ -212,11 +233,13 @@ def run_chatbot():
         print(f"Initialization error: {e}")
         return
 
-    print("Commands: 'switch' to change role | 'clear' to reset chat | 'exit' to quit\n")
+    print("Commands: 'switch' to change role | 'clear' to reset | 'exit' to quit")
+    print("(Data source is fixed by role: Admin sees all data, others synthetic only.)\n")
 
     while True:
         try:
-            query = input(f"\n[{chatbot.user_role}] You: ").strip()
+            eff_scope = effective_source_scope(chatbot.user_role, "all")
+            query = input(f"\n[{chatbot.user_role} | {eff_scope.upper()} | ALL] You: ").strip()
             if not query:
                 continue
             if query.lower() in ["exit", "quit", "q"]:
@@ -241,9 +264,13 @@ def run_chatbot():
             result = chatbot.ask(query)
             print("\n" + result["answer"])
             if result["sources"]:
-                print(f"\n[Authorized Records: {', '.join([s['id'] + ' (' + s['clearance'] + ')' for s in result['sources']])}]")
+                citations = [
+                    f"[{s['id']} | {s['source'].title()} | {s['file_type'].upper()} | {s['clearance']}]"
+                    for s in result["sources"]
+                ]
+                print(f"\n[Sources Cited: {', '.join(citations)}]")
             else:
-                print("\n[No authorized records within your clearance level]")
+                print("\n[No authorized records within your clearance level and filters]")
 
         except KeyboardInterrupt:
             print("\nSession interrupted.")

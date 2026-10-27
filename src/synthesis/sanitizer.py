@@ -1,5 +1,5 @@
 """
-sanitizer.py — Entity-Preserving Semantic Anonymization & Persona Rewriter
+sanitizer.py - Entity-Preserving Semantic Anonymization & Persona Rewriter
 Preserves true corporate procedural steps, decisions, and business rules,
 while deterministically replacing vulnerable PII, executive names (POIs), and dollar thresholds.
 """

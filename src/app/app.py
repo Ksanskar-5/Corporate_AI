@@ -1,5 +1,5 @@
 """
-app.py — Main CustomTkinter Application Window & Shell
+app.py - Main CustomTkinter Application Window & Shell
 Manages window layout, top profile header, left navigation rail, and dynamic view switching.
 """
 
@@ -20,7 +20,7 @@ class CorporateAIApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Corporate AI Desktop — Privacy-Preserving Enterprise Intelligence")
+        self.title("Corporate AI Desktop - Privacy-Preserving Enterprise Intelligence")
         self.geometry("1180x760")
         self.minsize(980, 640)
 

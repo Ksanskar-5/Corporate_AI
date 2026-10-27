@@ -1,5 +1,5 @@
 """
-chat_view.py — Role-Aware RAG Copilot Chat Screen
+chat_view.py - Role-Aware RAG Copilot Chat Screen
 Queries vector embeddings of synthetic enterprise data in Chroma DB with strict pre-retrieval
 clearance filters and generates verified corporate responses using Google Gemini without GUI freezing.
 """
@@ -223,8 +223,10 @@ class ChatView(ctk.CTkFrame):
             chips_frame.pack(fill="x", padx=10, pady=(0, 6))
 
             for s in sources:
-                risk_tag = " | ⚠️ AUDIT REQUIRED" if s.get("compliance_label") == 1 else ""
-                chip_text = f"[{s.get('id')}] {s.get('title')[:30]} ({s.get('clearance')}{risk_tag})"
+                risk_tag = " | ⚠️ AUDIT" if s.get("compliance_label") == 1 else ""
+                ftype = (s.get("file_type") or "txt").upper()
+                src = (s.get("source") or "synth").title()
+                chip_text = f"[{ftype} | {src}] {s.get('title')[:26]} ({s.get('clearance')}{risk_tag})"
                 chip_color = "#991B1B" if s.get("compliance_label") == 1 else "#1E293B"
 
                 pill = ctk.CTkLabel(

@@ -1,5 +1,5 @@
 """
-src/ingestion — Universal Enterprise Data Ingestion Layer
+src/ingestion - Universal Enterprise Data Ingestion Layer
 Supports CSV, JSON, PDF, and TXT files, storing all records into a local DuckDB vault.
 """
 

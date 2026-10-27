@@ -1,5 +1,5 @@
 """
-login_view.py — Sleek Login & Quick Role Switcher View
+login_view.py - Sleek Login & Quick Role Switcher View
 Allows direct credential login or instant 1-click test role access.
 """
 

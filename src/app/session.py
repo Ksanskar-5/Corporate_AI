@@ -1,5 +1,5 @@
 """
-session.py — Application Session & Current User State Management
+session.py - Application Session & Current User State Management
 Tracks the currently authenticated user, clearance levels, and role permissions.
 """
 
@@ -36,7 +36,7 @@ class UserSession:
 
     @property
     def role(self) -> str:
-        return self.user.get("role", "General_Employee") if self.user else "General_Employee"
+        return self.user.get("role", "Employee") if self.user else "Employee"
 
     @property
     def department(self) -> str:
@@ -45,18 +45,23 @@ class UserSession:
     @property
     def clearance_description(self) -> str:
         """Returns readable clearance privileges based on user role."""
-        if self.role == "Executive":
+        if self.role == "Admin":
             return "Clearance: RESTRICTED (Full C-Suite Access)"
-        if self.role == "Compliance_Auditor":
-            return "Clearance: AUDIT & CONFIDENTIAL (Global Scope)"
-        if self.role == "Department_Manager":
+        if self.role == "Analyst":
+            return "Clearance: AUDIT & CONFIDENTIAL (Global Analytics)"
+        if self.role == "Manager":
             return "Clearance: CONFIDENTIAL (Departmental Scope)"
         return "Clearance: INTERNAL (Standard Operations)"
 
     @property
     def can_access_pipeline(self) -> bool:
-        """Only Managers and Executives can trigger data ingestion and synthesis."""
-        return self.role in ["Executive", "Department_Manager", "Compliance_Auditor"]
+        """Managers, Analysts, and Admins can trigger data ingestion and synthesis."""
+        return self.role in ["Admin", "Manager", "Analyst"]
+
+    @property
+    def can_upload(self) -> bool:
+        """Only Admins and Managers may add files (mirrors WRITE_ROLES)."""
+        return self.role in ["Admin", "Manager"]
 
 
 # Global session instance

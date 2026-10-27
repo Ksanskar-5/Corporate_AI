@@ -1,12 +1,12 @@
 """
-auth_db.py — SQLite Authentication & Role-Based Access Control (RBAC) User Store
+auth_db.py - SQLite Authentication & Role-Based Access Control (RBAC) User Store
 Manages user accounts, salted password hashes, departments, and pre-seeded test accounts.
 
 Roles (general corporate hierarchy):
-  Admin    — Full system access: assistant, database (view/edit/delete), file upload
-  Manager  — Department access: assistant, database (view + upload new files)
-  Analyst  — Read-only data access: assistant, database view only
-  Employee — Basic: assistant only
+  Admin    - Full system access: assistant, database (view/edit/delete), file upload
+  Manager  - Department access: assistant, database (view + upload new files)
+  Analyst  - Read-only data access: assistant, database view only
+  Employee - Basic: assistant only
 """
 
 import os
@@ -29,7 +29,7 @@ SUPPORTED_ROLES = [
 ]
 
 # DB-access roles (can see the Database view)
-DB_ACCESS_ROLES = {"Admin", "Manager", "Analyst"}
+DB_ACCESS_ROLES = {"Admin", "Manager", "Analyst", "Employee"}
 
 # Write-access roles (can upload files)
 WRITE_ROLES = {"Admin", "Manager"}
@@ -41,28 +41,28 @@ PRESEEDED_ACCOUNTS = [
     {
         "username": "employee",
         "password": "pass123",
-        "full_name": "Jordan Smith",
+        "full_name": "Aarav Sharma",
         "role": "Employee",
         "department": "Operations",
     },
     {
         "username": "analyst",
         "password": "pass123",
-        "full_name": "Priya Nair",
+        "full_name": "Ananya Iyer",
         "role": "Analyst",
         "department": "Finance",
     },
     {
         "username": "manager",
         "password": "pass123",
-        "full_name": "Marcus Vance",
+        "full_name": "Rohan Verma",
         "role": "Manager",
         "department": "Sales",
     },
     {
         "username": "admin",
         "password": "pass123",
-        "full_name": "Victoria Sterling",
+        "full_name": "Aditya Rao",
         "role": "Admin",
         "department": "Executive",
     },

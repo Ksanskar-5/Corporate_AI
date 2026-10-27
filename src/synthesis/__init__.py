@@ -1,5 +1,5 @@
 """
-src/synthesis — Simple Batch JSON LLM Synthesis Engine
+src/synthesis - Simple Batch JSON LLM Synthesis Engine
 """
 
 from .engine import synthesize_batch, synthesize_from_file

@@ -64,9 +64,9 @@ def save_synthetic_batch(records: list[dict], db_path: str = STRUCTURED_DB_PATH)
         roles = r.get("allowed_roles")
         if not roles:
             if is_exec:
-                roles = "Executive,Compliance_Auditor"
+                roles = "Admin"
             elif comp_lbl == 1:
-                roles = "Compliance_Auditor,Executive"
+                roles = "Admin,Analyst,Manager"
             else:
                 roles = "All"
         elif isinstance(roles, list):

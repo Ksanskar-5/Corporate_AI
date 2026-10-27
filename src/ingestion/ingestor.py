@@ -1,5 +1,5 @@
 """
-ingestor.py — Universal Ingestion Controller
+ingestor.py - Universal Ingestion Controller
 Takes any enterprise file (CSV, JSON, PDF, TXT), automatically parses it,
 and stores it in the local DuckDB vault.
 """

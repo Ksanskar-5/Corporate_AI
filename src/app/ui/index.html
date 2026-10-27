@@ -1,909 +1,3850 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Corporate AI: Knowledge Desk</title>
+  <title>Corporate AI: Enterprise Data Management & Intelligence Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,300;1,6..72,400&family=Figtree:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <style>
     :root {
-      --bg:        #F4F6F8;
-      --surface:   #FFFFFF;
-      --surface-2: #F0F2F5;
-      --surface-3: #E8EAED;
-      --rule:      #E2E4E8;
-      --rule-hi:   #C8CDD5;
+      --bg: #F4F6F9;
+      --surface: #FFFFFF;
+      --surface-2: #F0F2F6;
+      --surface-3: #E6E9EF;
+      --rule: #E2E5EA;
+      --rule-hi: #CAD0DA;
 
-      --blue:      #2B5CE6;
-      --blue-dim:  rgba(43,92,230,.08);
-      --blue-hi:   rgba(43,92,230,.15);
-      --blue-btn:  #2350CC;
+      --blue: #2563EB;
+      --blue-dim: rgba(37, 99, 235, .08);
+      --blue-hi: rgba(37, 99, 235, .15);
+      --blue-btn: #1D4ED8;
 
-      --green:     #1B9B52;
-      --green-dim: rgba(27,155,82,.1);
-      --red:       #C0392B;
-      --red-dim:   rgba(192,57,43,.08);
-      --amber:     #D97706;
-      --amber-dim: rgba(217,119,6,.1);
-      --purple:    #6B5EA8;
-      --purple-dim:rgba(107,94,168,.1);
+      --green: #10B981;
+      --green-dim: rgba(16, 185, 129, .1);
+      --red: #EF4444;
+      --red-dim: rgba(239, 68, 68, .1);
+      --amber: #F59E0B;
+      --amber-dim: rgba(245, 158, 11, .1);
+      --purple: #8B5CF6;
+      --purple-dim: rgba(139, 92, 246, .1);
+      --indigo: #6366F1;
+      --indigo-dim: rgba(99, 102, 241, .1);
 
-      --t1: #0F1C2E;
-      --t2: #4A5568;
-      --t3: #9AA3AF;
+      --fmt-pdf: #DC2626;
+      --fmt-pdf-bg: rgba(220, 38, 38, .09);
+      --fmt-md: #4F46E5;
+      --fmt-md-bg: rgba(79, 70, 229, .09);
+      --fmt-csv: #059669;
+      --fmt-csv-bg: rgba(5, 150, 105, .09);
+      --fmt-txt: #7C3AED;
+      --fmt-txt-bg: rgba(124, 58, 237, .09);
+      --fmt-json: #D97706;
+      --fmt-json-bg: rgba(217, 119, 6, .09);
 
-      --serif: 'Fraunces','Georgia',serif;
-      --sans:  'DM Sans',system-ui,sans-serif;
-      --mono:  'DM Mono','Fira Mono',monospace;
+      --t1: #0F172A;
+      --t2: #475569;
+      --t3: #94A3B8;
 
-      --sw: 220px;
-      --r:  8px;
-      --rs: 5px;
+      --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+      --sans: 'Figtree', -apple-system, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+      --mono: 'IBM Plex Mono', 'SF Mono', Menlo, monospace;
+
+      --sw: 242px;
+      --r: 10px;
+      --rs: 6px;
     }
 
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;overflow:hidden}
-    body{font-family:var(--sans);background:var(--bg);color:var(--t1);display:flex;-webkit-font-smoothing:antialiased;user-select:none}
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--t1);
+      display: flex;
+      -webkit-font-smoothing: antialiased;
+      user-select: none
+    }
 
     /* SIDEBAR */
-    aside{width:var(--sw);flex-shrink:0;background:var(--surface);border-right:1px solid var(--rule);display:flex;flex-direction:column;height:100vh;overflow:hidden}
-    .s-head{padding:18px 16px 14px;border-bottom:1px solid var(--rule)}
-    .brand-name{font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--t1)}
-    .brand-sub{font-size:9.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:2px}
-    .nav-wrap{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:2px;overflow:hidden}
-    .nav-label{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);padding:8px 8px 4px}
-    .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--rs);font-size:12.5px;font-weight:400;color:var(--t2);cursor:pointer;transition:background .1s,color .1s;border:1px solid transparent}
-    .nav-item svg{width:14px;height:14px;flex-shrink:0;opacity:.4;stroke-width:1.75}
-    .nav-item:hover{background:var(--surface-2);color:var(--t1)}
-    .nav-item:hover svg{opacity:.7}
-    .nav-item.active{background:var(--blue-dim);border-color:rgba(43,92,230,.15);color:var(--blue);font-weight:500}
-    .nav-item.active svg{opacity:1;color:var(--blue)}
-    .s-foot{padding:12px 12px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
-    .user-block{display:flex;align-items:center;gap:10px}
-    .av{width:28px;height:28px;border-radius:5px;background:var(--blue-dim);border:1px solid rgba(43,92,230,.18);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:10px;font-weight:600;color:var(--blue);flex-shrink:0}
-    .u-meta{flex:1;min-width:0}
-    .u-name{font-size:11.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t1)}
-    .u-role{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-    .role-Admin    {color:var(--red)}
-    .role-Manager  {color:var(--blue)}
-    .role-Analyst  {color:var(--purple)}
-    .role-Employee {color:var(--t3)}
-    .btn-switch{width:100%;background:transparent;border:1px solid var(--rule);color:var(--t2);border-radius:var(--rs);font-size:11px;font-weight:500;font-family:var(--sans);padding:5px 10px;cursor:pointer;transition:all .1s}
-    .btn-switch:hover{background:var(--surface-2);color:var(--t1);border-color:var(--rule-hi)}
+    aside {
+      width: var(--sw);
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden
+    }
 
-    /* MAIN */
-    main{flex:1;height:100vh;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-    .topbar{height:44px;flex-shrink:0;border-bottom:1px solid var(--rule);display:flex;align-items:center;padding:0 22px;gap:16px;background:var(--surface)}
-    .topbar-title{font-family:var(--serif);font-size:13.5px;font-weight:400;font-style:italic;color:var(--t2);flex:1}
-    .topbar-meta{display:flex;align-items:center;gap:12px}
-    .topbar-pill{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:500;color:var(--t3);padding:3px 8px;background:var(--surface-2);border:1px solid var(--rule);border-radius:12px}
-    .pip{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
-    .view{display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden}
-    .view.active{display:flex}
+    .s-head {
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid var(--rule)
+    }
 
-    /* CHAT */
-    .chat-shell{display:flex;flex-direction:column;height:100%;overflow:hidden}
-    .chat-stream{flex:1;overflow-y:auto;overflow-x:hidden;padding:28px 0 8px;scroll-behavior:smooth}
-    .chat-stream::-webkit-scrollbar{width:0}
-    .chat-col{max-width:700px;margin:0 auto;width:100%;padding:0 28px;display:flex;flex-direction:column;gap:20px}
-    .welcome{padding:16px 0 8px}
-    .w-greeting{font-family:var(--serif);font-size:24px;font-weight:300;letter-spacing:-.02em;color:var(--t1);line-height:1.2;margin-bottom:8px}
-    .w-greeting em{font-style:italic;color:var(--blue)}
-    .w-desc{font-size:13px;color:var(--t2);line-height:1.6;max-width:500px;margin-bottom:22px;font-weight:300}
-    .sugg-label{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
-    .sugg-list{display:flex;flex-direction:column;border-top:1px solid var(--rule)}
-    .sugg-item{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--rule);font-size:12.5px;color:var(--t2);cursor:pointer;transition:color .1s;font-weight:400}
-    .sugg-item::before{content:'\2197';font-size:11px;color:var(--t3);flex-shrink:0;transition:color .1s}
-    .sugg-item:hover{color:var(--blue)}.sugg-item:hover::before{color:var(--blue)}
-    .msg{display:flex;flex-direction:column;animation:mi .15s ease-out}
-    @keyframes mi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-    .msg.user{align-items:flex-end}
-    .msg.user .bbl{background:var(--blue);border-radius:var(--r) var(--r) 2px var(--r);padding:9px 15px;font-size:13px;line-height:1.5;color:#fff;max-width:68%}
-    .msg.assistant{align-items:flex-start}
-    .msg.assistant .bbl{width:100%;background:transparent;padding:0}
-    .msg-label{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px;display:flex;align-items:center;gap:5px}
-    .msg-label::before{content:'';display:inline-block;width:12px;height:1px;background:var(--blue);opacity:.5}
-    .msg-label.err-lbl{color:var(--red)}.msg-label.err-lbl::before{background:var(--red)}
-    .msg-body{font-size:13.5px;line-height:1.7;color:var(--t1);font-weight:300;user-select:text}
-    .msg-body p{margin-bottom:8px}.msg-body p:last-child{margin-bottom:0}
-    .msg-body strong{font-weight:500}.msg-body em{font-style:italic;color:var(--t2)}
-    .msg-body ul,.msg-body ol{padding-left:18px;margin:5px 0}.msg-body li{margin-bottom:3px}
-    .msg-body code{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1px solid var(--rule);border-radius:3px;padding:1px 5px;color:var(--blue)}
-    .tdots{display:inline-flex;gap:4px;align-items:center;padding:4px 0}
-    .tdots span{width:3px;height:3px;border-radius:50%;background:var(--t3);animation:dp 1.2s infinite}
-    .tdots span:nth-child(2){animation-delay:.2s}.tdots span:nth-child(3){animation-delay:.4s}
-    @keyframes dp{0%,80%,100%{opacity:.2}40%{opacity:1}}
-    .sources{margin-top:12px;padding-top:9px;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:5px}
-    .src-ref{font-family:var(--mono);font-size:9.5px;color:var(--t3);padding:2px 6px;border:1px solid var(--rule);border-radius:3px;background:var(--surface);white-space:nowrap}
-    .src-ref.flagged{color:var(--red);border-color:rgba(192,57,43,.2);background:var(--red-dim)}
-    .input-dock{flex-shrink:0;background:var(--surface);border-top:1px solid var(--rule);padding:12px 24px 14px}
-    .input-frame{max-width:700px;margin:0 auto}
-    .input-row{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--rule-hi);border-radius:var(--r);padding:3px 5px 3px 14px;transition:border-color .12s,box-shadow .12s}
-    .input-row:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
-    .chat-input{flex:1;background:transparent;border:none;outline:none;color:var(--t1);font-size:13px;font-family:var(--sans);font-weight:300;padding:8px 0;height:36px;overflow:hidden;resize:none}
-    .chat-input::placeholder{color:var(--t3);font-weight:300}
-    .btn-send{background:var(--blue);color:#fff;border:none;border-radius:var(--rs);width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:opacity .12s}
-    .btn-send:hover{opacity:.85}.btn-send:disabled{opacity:.3;cursor:not-allowed}
-    .btn-send svg{width:13px;height:13px}
-    .input-sub{margin-top:5px;font-size:9.5px;color:var(--t3)}
+    .brand-name {
+      font-family: var(--serif);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      color: var(--t1);
+      display: flex;
+      align-items: center;
+      gap: 7px
+    }
 
-    /* DATABASE */
-    .db-shell{display:flex;height:100%;overflow:hidden}
+    .brand-sub {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-top: 2px
+    }
 
-    /* Left: table panel */
-    .db-left{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:20px 0 16px 22px;gap:12px}
-    .db-hdr{display:flex;align-items:center;gap:10px;padding-right:22px;flex-shrink:0}
-    .db-hdr-title{font-family:var(--serif);font-size:18px;font-weight:400;letter-spacing:-.02em;color:var(--t1);flex:1}
-    .db-filters{display:flex;align-items:center;gap:6px;padding-right:22px;flex-shrink:0;flex-wrap:wrap}
-    .srch-wrap{position:relative;display:flex;align-items:center}
-    .srch-ico{position:absolute;left:9px;color:var(--t3);pointer-events:none}
-    .db-search{background:var(--surface);border:1px solid var(--rule);border-radius:var(--rs);padding:6px 10px 6px 28px;color:var(--t1);font-size:11.5px;font-family:var(--sans);outline:none;width:190px;transition:border-color .12s;font-weight:300}
-    .db-search::placeholder{color:var(--t3)}.db-search:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-dim)}
-    .db-sel{background:var(--surface);border:1px solid var(--rule);border-radius:var(--rs);padding:6px 9px;color:var(--t2);font-size:11.5px;font-family:var(--sans);outline:none;cursor:pointer}
-    .btn-cta{background:var(--blue);color:#fff;border:none;border-radius:var(--rs);font-size:11px;font-weight:600;font-family:var(--sans);padding:6px 12px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:opacity .12s}
-    .btn-cta:hover{opacity:.85}
-    .tbl-wrap{flex:1;overflow:auto;border:1px solid var(--rule);border-radius:var(--r);background:var(--surface);min-height:0;margin-right:22px}
-    .tbl-wrap::-webkit-scrollbar{width:4px;height:4px}
-    .tbl-wrap::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
-    table.rt{width:100%;border-collapse:collapse;font-size:11.5px}
-    table.rt thead{position:sticky;top:0;z-index:2}
-    table.rt th{text-align:left;padding:8px 12px;font-size:8.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);background:var(--surface-2);border-bottom:1px solid var(--rule);white-space:nowrap}
-    table.rt td{padding:10px 12px;border-bottom:1px solid #F4F5F7;vertical-align:middle}
-    table.rt tbody tr:last-child td{border-bottom:none}
-    table.rt tbody tr.clickable{cursor:pointer}
-    table.rt tbody tr.clickable:hover td{background:#F5F7FB}
-    table.rt tbody tr.row-selected td{background:var(--blue-dim)}
-    .rid{font-family:var(--mono);font-size:9.5px;color:var(--t3)}
-    .rtitle{font-size:12px;font-weight:400;color:var(--t1);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
-    .rdept{color:var(--t2);font-size:11px}
-    .rauthor{color:var(--t3);font-size:10.5px;font-family:var(--mono)}
-    .badge{display:inline-block;font-size:8.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:3px}
-    .badge-Public      {background:var(--green-dim);color:var(--green)}
-    .badge-Internal    {background:var(--blue-dim);color:var(--blue)}
-    .badge-Confidential{background:var(--amber-dim);color:var(--amber)}
-    .badge-Restricted  {background:var(--red-dim);color:var(--red)}
-    .badge-flagged{background:var(--red-dim);color:var(--red)}
-    .badge-clean{background:var(--green-dim);color:var(--green)}
-    .tbl-act{display:flex;gap:4px}
-    .btn-row{background:transparent;border:1px solid var(--rule);border-radius:4px;padding:3px 8px;font-size:10px;font-weight:500;font-family:var(--sans);cursor:pointer;transition:all .1s;color:var(--t2)}
-    .btn-row:hover{border-color:var(--rule-hi);color:var(--t1)}
-    .btn-row.del:hover{background:var(--red-dim);border-color:rgba(192,57,43,.25);color:var(--red)}
-    .btn-row.edit:hover{background:var(--blue-dim);border-color:rgba(43,92,230,.2);color:var(--blue)}
-    .db-foot{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;font-size:10px;color:var(--t3);padding-right:22px}
-    .tbl-msg{padding:48px 16px;text-align:center;color:var(--t3);font-size:12.5px}
-    .tbl-msg.err{color:var(--red)}
+    .nav-wrap {
+      flex: 1;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow: hidden
+    }
 
-    /* Right: detail panel */
-    .db-right{width:320px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--rule);display:flex;flex-direction:column;overflow:hidden;transition:width .2s}
-    .db-right.closed{width:0;border-left:none}
-    .dp-inner{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:320px}
-    .dp-hdr{padding:16px 16px 12px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:8px;flex-shrink:0}
-    .dp-hdr h3{font-family:var(--serif);font-size:14px;font-weight:400;flex:1;letter-spacing:-.01em}
-    .dp-close{background:transparent;border:none;cursor:pointer;color:var(--t3);padding:4px;border-radius:4px;display:flex;align-items:center;transition:color .1s}
-    .dp-close:hover{color:var(--t1)}
-    .dp-body{flex:1;overflow-y:auto;padding:16px}
-    .dp-body::-webkit-scrollbar{width:3px}.dp-body::-webkit-scrollbar-thumb{background:var(--rule)}
-    .dp-field{margin-bottom:14px}
-    .dp-lbl{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
-    .dp-val{font-size:12.5px;color:var(--t1);line-height:1.5;user-select:text}
-    .dp-val.mono{font-family:var(--mono);font-size:11px;color:var(--t2)}
-    .dp-val.content{font-size:12px;color:var(--t2);line-height:1.6;font-weight:300;max-height:200px;overflow-y:auto}
-    .dp-val.content::-webkit-scrollbar{width:3px}.dp-val.content::-webkit-scrollbar-thumb{background:var(--rule)}
-    .dp-foot{padding:12px 16px;border-top:1px solid var(--rule);display:flex;gap:6px;flex-shrink:0}
+    .nav-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--t3);
+      padding: 8px 8px 4px
+    }
 
-    /* MODALS */
-    .overlay{position:fixed;inset:0;background:rgba(15,28,46,.4);display:none;align-items:center;justify-content:center;z-index:200}
-    .overlay.open{display:flex}
-    .modal{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);width:90%;max-width:480px;box-shadow:0 16px 40px rgba(15,28,46,.16)}
-    .m-hd{padding:18px 20px 14px;border-bottom:1px solid var(--rule)}
-    .m-hd h3{font-family:var(--serif);font-size:15px;font-weight:400;letter-spacing:-.01em;margin-bottom:3px}
-    .m-hd p{font-size:11.5px;color:var(--t2);line-height:1.5;font-weight:300}
-    .m-body{padding:16px 20px}
-    .m-foot{padding:12px 20px;border-top:1px solid var(--rule);display:flex;justify-content:flex-end;gap:7px}
-    .fg{margin-bottom:12px}
-    .fl{display:block;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
-    .fc{width:100%;background:var(--bg);border:1px solid var(--rule);border-radius:var(--rs);padding:7px 11px;color:var(--t1);font-size:12.5px;font-family:var(--sans);font-weight:300;outline:none;transition:border-color .12s}
-    .fc:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-dim)}
-    select.fc{cursor:pointer}
-    textarea.fc{resize:vertical;min-height:80px;line-height:1.5}
-    .up-st{font-size:11px;min-height:16px;margin-bottom:3px}
-    .rc{display:flex;align-items:center;gap:11px;padding:9px 11px;border:1px solid var(--rule);border-radius:var(--rs);cursor:pointer;transition:background .1s;margin-bottom:5px}
-    .rc:last-child{margin-bottom:0}.rc:hover{background:var(--surface-2)}
-    .rc.sel{border-color:rgba(43,92,230,.25);background:var(--blue-dim)}
-    .rc-av{width:28px;height:28px;border-radius:5px;background:var(--surface-2);border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:10px;font-weight:600;flex-shrink:0}
-    .rc-info{flex:1;min-width:0}
-    .rc-name{font-size:12px;font-weight:500}
-    .rc-desc{font-size:10px;color:var(--t3);margin-top:1px;line-height:1.4}
-    /* Small role badge in rc */
-    .rc-role{font-size:8.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:3px;margin-top:2px;display:inline-block}
-    .rcr-Admin   {background:var(--red-dim);color:var(--red)}
-    .rcr-Manager {background:var(--blue-dim);color:var(--blue)}
-    .rcr-Analyst {background:var(--purple-dim);color:var(--purple)}
-    .rcr-Employee{background:var(--surface-2);color:var(--t3)}
-    /* Confirm */
-    .del-warn{background:var(--red-dim);border:1px solid rgba(192,57,43,.2);border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--red);margin-bottom:12px;line-height:1.5}
-    .btn-ghost{background:transparent;border:1px solid var(--rule);color:var(--t2);border-radius:var(--rs);font-size:11px;font-weight:500;font-family:var(--sans);padding:6px 14px;cursor:pointer;transition:all .1s}
-    .btn-ghost:hover{background:var(--surface-2);color:var(--t1);border-color:var(--rule-hi)}
-    .btn-ok{background:var(--blue);color:#fff;border:none;border-radius:var(--rs);font-size:11px;font-weight:600;font-family:var(--sans);padding:6px 14px;cursor:pointer;transition:opacity .1s}
-    .btn-ok:hover{opacity:.85}.btn-ok:disabled{opacity:.35;cursor:not-allowed}
-    .btn-danger{background:var(--red);color:#fff;border:none;border-radius:var(--rs);font-size:11px;font-weight:600;font-family:var(--sans);padding:6px 14px;cursor:pointer;transition:opacity .1s}
-    .btn-danger:hover{opacity:.85}
-    .hidden{display:none!important}
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--rs);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--t2);
+      cursor: pointer;
+      transition: background .1s, color .1s;
+      border: 1px solid transparent
+    }
+
+    .nav-item svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      opacity: .5;
+      stroke-width: 1.8
+    }
+
+    .nav-item:hover {
+      background: var(--surface-2);
+      color: var(--t1)
+    }
+
+    .nav-item:hover svg {
+      opacity: .8
+    }
+
+    .nav-item.active {
+      background: var(--blue-dim);
+      border-color: rgba(37, 99, 235, .18);
+      color: var(--blue);
+      font-weight: 600
+    }
+
+    .nav-item.active svg {
+      opacity: 1;
+      color: var(--blue)
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-size: 9px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--t3)
+    }
+
+    .s-foot {
+      padding: 12px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--surface)
+    }
+
+    .user-block {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .av {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: var(--blue-dim);
+      border: 1px solid rgba(37, 99, 235, .2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--serif);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--blue);
+      flex-shrink: 0
+    }
+
+    .u-meta {
+      flex: 1;
+      min-width: 0
+    }
+
+    .u-name {
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--t1)
+    }
+
+    .u-role {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-top: 2px
+    }
+
+    .role-Admin {
+      background: var(--red-dim);
+      color: var(--red)
+    }
+
+    .role-Manager {
+      background: var(--blue-dim);
+      color: var(--blue)
+    }
+
+    .role-Analyst {
+      background: var(--purple-dim);
+      color: var(--purple)
+    }
+
+    .role-Employee {
+      background: var(--surface-2);
+      color: var(--t2)
+    }
+
+    .btn-switch {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--rule);
+      color: var(--t2);
+      border-radius: var(--rs);
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--sans);
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: all .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px
+    }
+
+    .btn-switch:hover {
+      background: var(--surface-3);
+      color: var(--t1);
+      border-color: var(--rule-hi)
+    }
+
+    /* MAIN CONTAINER */
+    main {
+      flex: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0
+    }
+
+    .topbar {
+      height: 54px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      padding: 0 26px;
+      gap: 16px;
+      background: var(--surface)
+    }
+
+    .topbar-title {
+      font-family: var(--serif);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--t1);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .topbar-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .topbar-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--t2);
+      padding: 3px 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--rule);
+      border-radius: 14px
+    }
+
+    .pip {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0
+    }
+
+    .view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden
+    }
+
+    .view.active {
+      display: flex
+    }
+
+    /* ── ASSISTANT / CHAT VIEW ── */
+    .chat-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden
+    }
+
+    .chat-control-dock {
+      background: var(--surface);
+      border-bottom: 1px solid var(--rule);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11.5px
+    }
+
+    .ctl-group {
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .ctl-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--t3)
+    }
+
+    .chat-sel {
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      padding: 4px 8px;
+      font-size: 11px;
+      font-family: var(--sans);
+      color: var(--t1);
+      outline: none;
+      cursor: pointer
+    }
+
+    .chat-stream {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 24px 0 8px;
+      scroll-behavior: smooth
+    }
+
+    .chat-stream::-webkit-scrollbar {
+      width: 4px
+    }
+
+    .chat-stream::-webkit-scrollbar-thumb {
+      background: var(--rule);
+      border-radius: 2px
+    }
+
+    .chat-col {
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px
+    }
+
+    .welcome {
+      padding: 14px 0 6px
+    }
+
+    .w-greeting {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: -.01em;
+      color: var(--t1);
+      line-height: 1.25;
+      margin-bottom: 8px
+    }
+
+    .w-greeting em {
+      font-style: italic;
+      color: var(--blue)
+    }
+
+    .w-desc {
+      font-size: 13px;
+      color: var(--t2);
+      line-height: 1.6;
+      max-width: 540px;
+      margin-bottom: 20px;
+      font-weight: 300
+    }
+
+    .sugg-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 7px
+    }
+
+    .sugg-list {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--rule)
+    }
+
+    .sugg-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--rule);
+      font-size: 12.5px;
+      color: var(--t2);
+      cursor: pointer;
+      transition: color .1s;
+      font-weight: 400
+    }
+
+    .sugg-item::before {
+      content: '\2197';
+      font-size: 11px;
+      color: var(--t3);
+      flex-shrink: 0;
+      transition: color .1s
+    }
+
+    .sugg-item:hover {
+      color: var(--blue)
+    }
+
+    .sugg-item:hover::before {
+      color: var(--blue)
+    }
+
+    .msg {
+      display: flex;
+      flex-direction: column;
+      animation: mi .15s ease-out
+    }
+
+    @keyframes mi {
+      from {
+        opacity: 0;
+        transform: translateY(4px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .msg.user {
+      align-items: flex-end
+    }
+
+    .msg.user .bbl {
+      background: var(--blue);
+      border-radius: var(--r) var(--r) 2px var(--r);
+      padding: 10px 16px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #fff;
+      max-width: 70%;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, .2)
+    }
+
+    .msg.assistant {
+      align-items: flex-start
+    }
+
+    .msg.assistant .bbl {
+      width: 100%;
+      background: transparent;
+      padding: 0
+    }
+
+    .msg-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .msg-label::before {
+      content: '';
+      display: inline-block;
+      width: 12px;
+      height: 1px;
+      background: var(--blue);
+      opacity: .5
+    }
+
+    .msg-label.err-lbl {
+      color: var(--red)
+    }
+
+    .msg-label.err-lbl::before {
+      background: var(--red)
+    }
+
+    .msg-body {
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--t1);
+      font-weight: 300;
+      user-select: text
+    }
+
+    .msg-body p {
+      margin-bottom: 8px
+    }
+
+    .msg-body p:last-child {
+      margin-bottom: 0
+    }
+
+    .msg-body strong {
+      font-weight: 600
+    }
+
+    .msg-body em {
+      font-style: italic;
+      color: var(--t2)
+    }
+
+    .msg-body ul,
+    .msg-body ol {
+      padding-left: 18px;
+      margin: 6px 0
+    }
+
+    .msg-body li {
+      margin-bottom: 4px
+    }
+
+    .msg-body code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--surface-2);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: var(--blue)
+    }
+
+    .tdots {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+      padding: 4px 0
+    }
+
+    .tdots span {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--t3);
+      animation: dp 1.2s infinite
+    }
+
+    .tdots span:nth-child(2) {
+      animation-delay: .2s
+    }
+
+    .tdots span:nth-child(3) {
+      animation-delay: .4s
+    }
+
+    @keyframes dp {
+
+      0%,
+      80%,
+      100% {
+        opacity: .2
+      }
+
+      40% {
+        opacity: 1
+      }
+    }
+
+    /* Interactive Citation Chips */
+    .sources-box {
+      margin-top: 12px;
+      padding: 9px 12px;
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .sources-title {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--t3)
+    }
+
+    .sources {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px
+    }
+
+    .src-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 8px;
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      background: var(--surface-2);
+      color: var(--t1);
+      cursor: pointer;
+      transition: all .12s
+    }
+
+    .src-chip:hover {
+      border-color: var(--blue);
+      background: var(--blue-dim);
+      color: var(--blue);
+      transform: translateY(-1px)
+    }
+
+    .src-chip .pill-src {
+      font-size: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 1px 4px;
+      border-radius: 2px
+    }
+
+    .src-chip .pill-src.synth {
+      background: var(--purple-dim);
+      color: var(--purple)
+    }
+
+    .src-chip .pill-src.vault {
+      background: var(--blue-dim);
+      color: var(--blue)
+    }
+
+    .src-chip .pill-fmt {
+      font-size: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 1px 4px;
+      border-radius: 2px
+    }
+
+    .src-chip .pill-fmt.pdf {
+      background: var(--fmt-pdf-bg);
+      color: var(--fmt-pdf)
+    }
+
+    .src-chip .pill-fmt.md {
+      background: var(--fmt-md-bg);
+      color: var(--fmt-md)
+    }
+
+    .src-chip .pill-fmt.csv {
+      background: var(--fmt-csv-bg);
+      color: var(--fmt-csv)
+    }
+
+    .src-chip .pill-fmt.txt {
+      background: var(--fmt-txt-bg);
+      color: var(--fmt-txt)
+    }
+
+    .input-dock {
+      flex-shrink: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--rule);
+      padding: 12px 24px 14px
+    }
+
+    .input-frame {
+      max-width: 800px;
+      margin: 0 auto
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border: 1px solid var(--rule-hi);
+      border-radius: var(--r);
+      padding: 3px 5px 3px 14px;
+      transition: border-color .12s, box-shadow .12s
+    }
+
+    .input-row:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-dim);
+      background: #fff
+    }
+
+    .chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--t1);
+      font-size: 13.5px;
+      font-family: var(--sans);
+      font-weight: 400;
+      padding: 8px 0;
+      height: 38px;
+      overflow: hidden;
+      resize: none
+    }
+
+    .chat-input::placeholder {
+      color: var(--t3);
+      font-weight: 300
+    }
+
+    .btn-send {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--rs);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity .12s
+    }
+
+    .btn-send:hover {
+      opacity: .85
+    }
+
+    .btn-send:disabled {
+      opacity: .3;
+      cursor: not-allowed
+    }
+
+    .btn-send svg {
+      width: 14px;
+      height: 14px
+    }
+
+    .input-sub {
+      margin-top: 6px;
+      font-size: 10px;
+      color: var(--t3);
+      display: flex;
+      justify-content: space-between
+    }
+
+    /* ── DATABASE / DATA MANAGEMENT SYSTEM ── */
+    .db-shell {
+      display: flex;
+      height: 100%;
+      overflow: hidden
+    }
+
+    .db-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 20px 0 16px 26px;
+      gap: 14px
+    }
+
+    /* KPI Stats Ribbon */
+    .kpi-ribbon {
+      display: flex;
+      gap: 10px;
+      padding-right: 22px;
+      flex-shrink: 0;
+      overflow-x: auto
+    }
+
+    .kpi-card {
+      flex: 1;
+      min-width: 130px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column
+    }
+
+    .kpi-lbl {
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--t3)
+    }
+
+    .kpi-num {
+      font-family: var(--serif);
+      font-size: 21px;
+      font-weight: 500;
+      color: var(--t1);
+      margin-top: 3px
+    }
+
+    .kpi-num.hi-blue {
+      color: var(--blue)
+    }
+
+    .kpi-num.hi-purple {
+      color: var(--purple)
+    }
+
+    .kpi-num.hi-green {
+      color: var(--green)
+    }
+
+    .kpi-num.hi-red {
+      color: var(--red)
+    }
+
+    /* Scope & Filter Bar */
+    .db-control-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-right: 22px;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex-shrink: 0
+    }
+
+    .scope-toggle {
+      display: inline-flex;
+      background: var(--surface-2);
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      padding: 2px
+    }
+
+    .scope-btn {
+      background: transparent;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--sans);
+      color: var(--t2);
+      cursor: pointer;
+      transition: all .12s
+    }
+
+    .scope-btn.active {
+      background: var(--surface);
+      color: var(--t1);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, .08)
+    }
+
+    .scope-btn:hover:not(.active) {
+      color: var(--t1)
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .srch-wrap {
+      position: relative;
+      display: flex;
+      align-items: center
+    }
+
+    .srch-ico {
+      position: absolute;
+      left: 9px;
+      color: var(--t3);
+      pointer-events: none
+    }
+
+    .db-search {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      padding: 6px 52px 6px 28px;
+      color: var(--t1);
+      font-size: 12px;
+      font-family: var(--sans);
+      outline: none;
+      width: 240px;
+      transition: border-color .12s
+    }
+
+    .db-search::placeholder {
+      color: var(--t3)
+    }
+
+    .db-search:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px var(--blue-dim)
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 26px;
+      background: transparent;
+      border: none;
+      color: var(--t3);
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: none
+    }
+
+    .search-clear:hover {
+      color: var(--t1);
+      background: var(--surface-2)
+    }
+
+    .search-clear.show {
+      display: block
+    }
+
+    .search-kbd {
+      position: absolute;
+      right: 8px;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--t3);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 0 4px;
+      pointer-events: none;
+      background: var(--surface-2)
+    }
+
+    /* Autocomplete suggestions dropdown */
+    .suggest-panel {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      width: 340px;
+      max-height: 320px;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--rule-hi);
+      border-radius: var(--r);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, .14);
+      z-index: 120;
+      display: none;
+      padding: 4px
+    }
+
+    .suggest-panel.open {
+      display: block
+    }
+
+    .suggest-panel::-webkit-scrollbar {
+      width: 4px
+    }
+
+    .suggest-panel::-webkit-scrollbar-thumb {
+      background: var(--rule);
+      border-radius: 2px
+    }
+
+    .suggest-head {
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--t3);
+      padding: 6px 8px 3px
+    }
+
+    .suggest-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 8px;
+      border-radius: var(--rs);
+      cursor: pointer;
+      font-size: 12px
+    }
+
+    .suggest-item:hover,
+    .suggest-item.active {
+      background: var(--blue-dim)
+    }
+
+    .suggest-item .sg-title {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--t1)
+    }
+
+    .suggest-item .sg-id {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      color: var(--t3);
+      flex-shrink: 0
+    }
+
+    mark {
+      background: rgba(37, 99, 235, .18);
+      color: var(--blue-btn);
+      border-radius: 2px;
+      padding: 0 1px;
+      font-weight: 600
+    }
+
+    /* Active-filter chips row */
+    .chips-row {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding-right: 22px;
+      flex-wrap: wrap;
+      flex-shrink: 0
+    }
+
+    .chips-row.show {
+      display: flex
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--t1);
+      background: var(--blue-dim);
+      border: 1px solid rgba(37, 99, 235, .22);
+      border-radius: 14px;
+      padding: 2px 6px 2px 10px
+    }
+
+    .chip button {
+      background: transparent;
+      border: none;
+      color: var(--blue);
+      cursor: pointer;
+      font-size: 11px;
+      line-height: 1;
+      padding: 1px 3px;
+      border-radius: 8px
+    }
+
+    .chip button:hover {
+      background: rgba(37, 99, 235, .18)
+    }
+
+    .chip-clear {
+      background: transparent;
+      border: none;
+      color: var(--t3);
+      font-size: 10.5px;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 2px 4px
+    }
+
+    .chip-clear:hover {
+      color: var(--red)
+    }
+
+    /* Recovery empty state */
+    .empty-box {
+      padding: 44px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px
+    }
+
+    .empty-box .e-title {
+      font-family: var(--serif);
+      font-size: 16px;
+      color: var(--t1)
+    }
+
+    .empty-box .e-sub {
+      font-size: 12px;
+      color: var(--t2);
+      max-width: 420px;
+      line-height: 1.6
+    }
+
+    /* Command palette (Cmd/Ctrl+K) */
+    .pal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .45);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      z-index: 300;
+      padding-top: 12vh
+    }
+
+    .pal-overlay.open {
+      display: flex
+    }
+
+    .pal-modal {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      width: 92%;
+      max-width: 560px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, .25);
+      overflow: hidden
+    }
+
+    .pal-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--rule)
+    }
+
+    .pal-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-family: var(--sans);
+      color: var(--t1);
+      background: transparent
+    }
+
+    .pal-list {
+      max-height: 320px;
+      overflow-y: auto;
+      padding: 6px
+    }
+
+    .pal-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12.5px;
+      color: var(--t1)
+    }
+
+    .pal-item:hover,
+    .pal-item.active {
+      background: var(--blue-dim)
+    }
+
+    .pal-item .pal-kind {
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: var(--surface-2);
+      color: var(--t2);
+      flex-shrink: 0
+    }
+
+    .pal-item .pal-hint {
+      margin-left: auto;
+      font-size: 10px;
+      color: var(--t3);
+      flex-shrink: 0
+    }
+
+    .pal-foot {
+      padding: 7px 14px;
+      border-top: 1px solid var(--rule);
+      font-size: 10px;
+      color: var(--t3);
+      display: flex;
+      gap: 12px
+    }
+
+    .db-sel {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      padding: 6px 9px;
+      color: var(--t2);
+      font-size: 11.5px;
+      font-family: var(--sans);
+      outline: none;
+      cursor: pointer
+    }
+
+    .btn-cta {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--rs);
+      font-size: 11.5px;
+      font-weight: 600;
+      font-family: var(--sans);
+      padding: 6px 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity .12s
+    }
+
+    .btn-cta:hover {
+      opacity: .88
+    }
+
+    /* Format Tabs & Layout Mode */
+    .format-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-right: 22px;
+      flex-shrink: 0
+    }
+
+    .fmt-tabs {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto
+    }
+
+    .fmt-tab {
+      background: transparent;
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--sans);
+      color: var(--t2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all .1s
+    }
+
+    .fmt-tab:hover {
+      background: var(--surface-2);
+      color: var(--t1)
+    }
+
+    .fmt-tab.active {
+      background: var(--surface);
+      border-color: var(--blue);
+      color: var(--blue);
+      font-weight: 600
+    }
+
+    .fmt-tab .badge-cnt {
+      font-size: 9px;
+      font-family: var(--mono);
+      padding: 1px 5px;
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--t3)
+    }
+
+    .fmt-tab.active .badge-cnt {
+      background: var(--blue-dim);
+      color: var(--blue)
+    }
+
+    .layout-switch {
+      display: flex;
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      overflow: hidden;
+      background: var(--surface)
+    }
+
+    .l-btn {
+      background: transparent;
+      border: none;
+      padding: 5px 8px;
+      cursor: pointer;
+      color: var(--t3);
+      display: flex;
+      align-items: center;
+      transition: all .1s
+    }
+
+    .l-btn:hover {
+      color: var(--t1)
+    }
+
+    .l-btn.active {
+      background: var(--surface-2);
+      color: var(--blue)
+    }
+
+    /* Content Area (Table vs Card Grid) */
+    .db-content-area {
+      flex: 1;
+      overflow: auto;
+      margin-right: 22px;
+      min-height: 0
+    }
+
+    .db-content-area::-webkit-scrollbar {
+      width: 4px;
+      height: 4px
+    }
+
+    .db-content-area::-webkit-scrollbar-thumb {
+      background: var(--rule);
+      border-radius: 2px
+    }
+
+    /* Table View */
+    .tbl-wrap {
+      border: 1px solid var(--rule);
+      border-radius: var(--r);
+      background: var(--surface);
+      min-height: 100%
+    }
+
+    table.rt {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px
+    }
+
+    table.rt thead {
+      position: sticky;
+      top: 0;
+      z-index: 2
+    }
+
+    table.rt th {
+      text-align: left;
+      padding: 9px 12px;
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--t3);
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--rule);
+      white-space: nowrap
+    }
+
+    table.rt td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #F3F4F6;
+      vertical-align: middle
+    }
+
+    table.rt tbody tr.clickable {
+      cursor: pointer
+    }
+
+    table.rt tbody tr.clickable:hover td {
+      background: #F8FAFC
+    }
+
+    table.rt tbody tr.row-selected td {
+      background: var(--blue-dim)
+    }
+
+    .rid {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--t3)
+    }
+
+    .rtitle {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--t1);
+      max-width: 240px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block
+    }
+
+    .rdept {
+      color: var(--t2);
+      font-size: 11px
+    }
+
+    .badge-fmt {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px
+    }
+
+    .bf-pdf {
+      background: var(--fmt-pdf-bg);
+      color: var(--fmt-pdf)
+    }
+
+    .bf-md {
+      background: var(--fmt-md-bg);
+      color: var(--fmt-md)
+    }
+
+    .bf-csv {
+      background: var(--fmt-csv-bg);
+      color: var(--fmt-csv)
+    }
+
+    .bf-txt {
+      background: var(--fmt-txt-bg);
+      color: var(--fmt-txt)
+    }
+
+    .bf-json {
+      background: var(--fmt-json-bg);
+      color: var(--fmt-json)
+    }
+
+    .badge-src {
+      display: inline-block;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 1px 5px;
+      border-radius: 2px
+    }
+
+    .bs-synth {
+      background: var(--purple-dim);
+      color: var(--purple)
+    }
+
+    .bs-vault {
+      background: var(--blue-dim);
+      color: var(--blue)
+    }
+
+    .badge-cl {
+      display: inline-block;
+      font-size: 8.5px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px
+    }
+
+    .bcl-Public {
+      background: var(--green-dim);
+      color: var(--green)
+    }
+
+    .bcl-Internal {
+      background: var(--blue-dim);
+      color: var(--blue)
+    }
+
+    .bcl-Confidential {
+      background: var(--amber-dim);
+      color: var(--amber)
+    }
+
+    .bcl-Restricted {
+      background: var(--red-dim);
+      color: var(--red)
+    }
+
+    .badge-flagged {
+      background: var(--red-dim);
+      color: var(--red);
+      font-size: 8.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px
+    }
+
+    .badge-clean {
+      background: var(--green-dim);
+      color: var(--green);
+      font-size: 8.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px
+    }
+
+    .tbl-act {
+      display: flex;
+      gap: 4px
+    }
+
+    .btn-row {
+      background: transparent;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 500;
+      font-family: var(--sans);
+      cursor: pointer;
+      transition: all .1s;
+      color: var(--t2)
+    }
+
+    .btn-row:hover {
+      border-color: var(--rule-hi);
+      color: var(--t1)
+    }
+
+    .btn-row.del:hover {
+      background: var(--red-dim);
+      border-color: rgba(239, 68, 68, .3);
+      color: var(--red)
+    }
+
+    .btn-row.edit:hover {
+      background: var(--blue-dim);
+      border-color: rgba(37, 99, 235, .25);
+      color: var(--blue)
+    }
+
+    /* Card / Grid View */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      padding: 2px
+    }
+
+    .doc-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r);
+      padding: 14px;
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative
+    }
+
+    .doc-card:hover {
+      border-color: var(--blue);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, .06);
+      transform: translateY(-2px)
+    }
+
+    .doc-card.selected {
+      border-color: var(--blue);
+      background: var(--blue-dim)
+    }
+
+    .dc-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .dc-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--t1);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden
+    }
+
+    .dc-snippet {
+      font-size: 11.5px;
+      color: var(--t2);
+      line-height: 1.5;
+      font-weight: 300;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden
+    }
+
+    .dc-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid var(--rule);
+      font-size: 10px;
+      color: var(--t3)
+    }
+
+    .db-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: var(--t3);
+      padding-right: 22px
+    }
+
+    .tbl-msg {
+      padding: 48px 16px;
+      text-align: center;
+      color: var(--t3);
+      font-size: 13px
+    }
+
+    .tbl-msg.err {
+      color: var(--red)
+    }
+
+    /* ── DETAIL DRAWER (RIGHT PANEL) ── */
+    .db-right {
+      width: 360px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-left: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: width .2s
+    }
+
+    .db-right.closed {
+      width: 0;
+      border-left: none
+    }
+
+    .dp-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 360px
+    }
+
+    .dp-hdr {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0
+    }
+
+    .dp-hdr h3 {
+      font-family: var(--serif);
+      font-size: 14px;
+      font-weight: 500;
+      flex: 1;
+      letter-spacing: -.01em;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis
+    }
+
+    .dp-close {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--t3);
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      transition: color .1s
+    }
+
+    .dp-close:hover {
+      color: var(--t1)
+    }
+
+    .dp-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px
+    }
+
+    .dp-body::-webkit-scrollbar {
+      width: 3px
+    }
+
+    .dp-body::-webkit-scrollbar-thumb {
+      background: var(--rule)
+    }
+
+    .dp-field {
+      margin-bottom: 12px
+    }
+
+    .dp-lbl {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 3px
+    }
+
+    .dp-val {
+      font-size: 12.5px;
+      color: var(--t1);
+      line-height: 1.5;
+      user-select: text
+    }
+
+    .dp-val.mono {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--t2)
+    }
+
+    /* Format-Specific Viewers inside drawer/modal */
+    .viewer-box {
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      background: var(--bg);
+      overflow: hidden;
+      margin-top: 6px
+    }
+
+    .viewer-toolbar {
+      padding: 6px 10px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px
+    }
+
+    .viewer-title {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .viewer-btn-group {
+      display: flex;
+      gap: 4px
+    }
+
+    .viewer-tab-btn {
+      background: transparent;
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 2px 7px;
+      font-size: 9.5px;
+      cursor: pointer;
+      font-family: var(--sans);
+      color: var(--t2)
+    }
+
+    .viewer-tab-btn.active {
+      background: var(--surface);
+      color: var(--blue);
+      border-color: var(--blue);
+      font-weight: 600
+    }
+
+    .viewer-canvas {
+      padding: 12px;
+      max-height: 260px;
+      overflow-y: auto;
+      font-size: 12px;
+      line-height: 1.6;
+      user-select: text
+    }
+
+    .viewer-canvas::-webkit-scrollbar {
+      width: 3px
+    }
+
+    .viewer-canvas::-webkit-scrollbar-thumb {
+      background: var(--rule)
+    }
+
+    /* PDF Page Viewer Styling */
+    .pdf-page-sheet {
+      background: #fff;
+      border: 1px solid var(--rule);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, .06);
+      padding: 14px;
+      border-radius: 4px;
+      font-family: var(--serif);
+      font-size: 12px;
+      line-height: 1.7;
+      color: #1E293B
+    }
+
+    .pdf-page-hdr {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--t3);
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 5px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between
+    }
+
+    /* CSV Table Viewer */
+    .csv-grid-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5px;
+      background: #fff
+    }
+
+    .csv-grid-tbl th {
+      background: var(--surface-2);
+      border: 1px solid var(--rule);
+      padding: 4px 6px;
+      font-weight: 600;
+      text-align: left;
+      position: sticky;
+      top: 0
+    }
+
+    .csv-grid-tbl td {
+      border: 1px solid var(--rule);
+      padding: 4px 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 140px
+    }
+
+    /* Markdown Rendered */
+    .md-render h1,
+    .md-render h2,
+    .md-render h3 {
+      font-family: var(--serif);
+      margin: 8px 0 4px;
+      color: var(--t1)
+    }
+
+    .md-render h1 {
+      font-size: 14px
+    }
+
+    .md-render h2 {
+      font-size: 13px
+    }
+
+    .md-render h3 {
+      font-size: 12px
+    }
+
+    .md-render p {
+      margin-bottom: 6px
+    }
+
+    .md-render ul {
+      padding-left: 16px;
+      margin: 4px 0
+    }
+
+    .md-render code {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      background: var(--surface-2);
+      padding: 1px 4px;
+      border-radius: 2px
+    }
+
+    .dp-foot {
+      padding: 12px 16px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0
+    }
+
+    /* ── MODALS ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .45);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200
+    }
+
+    .overlay.open {
+      display: flex
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r);
+      width: 90%;
+      max-width: 520px;
+      box-shadow: 0 20px 48px rgba(15, 23, 42, .18);
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .modal.modal-lg {
+      max-width: 780px;
+      height: 80vh
+    }
+
+    .m-hd {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .m-hd h3 {
+      font-family: var(--serif);
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -.01em
+    }
+
+    .m-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      flex: 1
+    }
+
+    .m-foot {
+      padding: 12px 20px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px
+    }
+
+    .fg {
+      margin-bottom: 12px
+    }
+
+    .fl {
+      display: block;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 4px
+    }
+
+    .fc {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      padding: 7px 11px;
+      color: var(--t1);
+      font-size: 12.5px;
+      font-family: var(--sans);
+      font-weight: 400;
+      outline: none;
+      transition: border-color .12s
+    }
+
+    .fc:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px var(--blue-dim);
+      background: #fff
+    }
+
+    select.fc {
+      cursor: pointer
+    }
+
+    textarea.fc {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.5
+    }
+
+    .up-st {
+      font-size: 11px;
+      min-height: 16px;
+      margin-bottom: 3px
+    }
+
+    .rc {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 9px 12px;
+      border: 1px solid var(--rule);
+      border-radius: var(--rs);
+      cursor: pointer;
+      transition: background .1s;
+      margin-bottom: 6px
+    }
+
+    .rc:last-child {
+      margin-bottom: 0
+    }
+
+    .rc:hover {
+      background: var(--surface-2)
+    }
+
+    .rc.sel {
+      border-color: rgba(37, 99, 235, .3);
+      background: var(--blue-dim)
+    }
+
+    .rc-av {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: var(--surface-2);
+      border: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--serif);
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0
+    }
+
+    .rc-info {
+      flex: 1;
+      min-width: 0
+    }
+
+    .rc-name {
+      font-size: 12.5px;
+      font-weight: 600
+    }
+
+    .rc-desc {
+      font-size: 10.5px;
+      color: var(--t3);
+      margin-top: 1px;
+      line-height: 1.4
+    }
+
+    .del-warn {
+      background: var(--red-dim);
+      border: 1px solid rgba(239, 68, 68, .25);
+      border-radius: var(--rs);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--red);
+      margin-bottom: 12px;
+      line-height: 1.5
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--rule);
+      color: var(--t2);
+      border-radius: var(--rs);
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--sans);
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all .1s
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface-2);
+      color: var(--t1);
+      border-color: var(--rule-hi)
+    }
+
+    .btn-ok {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--rs);
+      font-size: 11.5px;
+      font-weight: 600;
+      font-family: var(--sans);
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: opacity .1s
+    }
+
+    .btn-ok:hover {
+      opacity: .88
+    }
+
+    .btn-ok:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
+    .btn-danger {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: var(--rs);
+      font-size: 11.5px;
+      font-weight: 600;
+      font-family: var(--sans);
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: opacity .1s
+    }
+
+    .btn-danger:hover {
+      opacity: .88
+    }
+
+    .hidden {
+      display: none !important
+    }
   </style>
 </head>
+
 <body>
 
-<aside>
-  <div class="s-head">
-    <div class="brand-name">Corporate AI</div>
-    <div class="brand-sub">Knowledge Desk</div>
-  </div>
-  <div class="nav-wrap">
-    <div class="nav-label">Navigation</div>
-    <div class="nav-item active" id="nav-assistant" onclick="showView('assistant')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      Assistant
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="s-head">
+      <div class="brand-name">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          color="var(--blue)">
+          <polygon points="12 2 2 7 12 12 22 7 12 2" />
+          <polyline points="2 17 12 22 22 17" />
+          <polyline points="2 12 12 17 22 12" />
+        </svg>
+        Corporate AI
+      </div>
+      <div class="brand-sub">Enterprise Data Hub</div>
     </div>
-    <div class="nav-item" id="nav-database" onclick="showView('database')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-      Database
-    </div>
-  </div>
-  <div class="s-foot">
-    <div class="user-block">
-      <div class="av" id="av-mono">VS</div>
-      <div class="u-meta">
-        <div class="u-name" id="av-name">Victoria Sterling</div>
-        <div class="u-role role-Admin" id="av-role">Admin</div>
+    <div class="nav-wrap">
+      <div class="nav-label">Workspace</div>
+      <div class="nav-item active" id="nav-assistant" onclick="showView('assistant')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        Copilot Assistant
+      </div>
+      <div class="nav-item" id="nav-database" onclick="showView('database')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <ellipse cx="12" cy="5" rx="9" ry="3" />
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+        </svg>
+        Data Management
+        <span class="nav-badge" id="nav-db-badge">RBAC</span>
       </div>
     </div>
-    <button class="btn-switch" onclick="openModal('m-role')">Switch profile</button>
-  </div>
-</aside>
+    <div class="s-foot">
+      <div class="user-block">
+        <div class="av" id="av-mono">AS</div>
+        <div class="u-meta">
+          <div class="u-name" id="av-name">Aarav Sharma</div>
+          <div class="u-role role-Admin" id="av-role">Admin</div>
+        </div>
+      </div>
+      <button class="btn-switch" onclick="openModal('m-role')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 3 21 3 21 8" />
+          <line x1="4" y1="20" x2="21" y2="3" />
+          <polyline points="21 16 21 21 16 21" />
+          <line x1="15" y1="15" x2="21" y2="21" />
+        </svg>
+        Switch User Role
+      </button>
+    </div>
+  </aside>
 
-<main>
-  <div class="topbar">
-    <div class="topbar-title" id="topbar-title">Assistant</div>
-    <div class="topbar-meta">
-      <div class="topbar-pill" id="topbar-access-pill">
-        <div class="pip"></div>
-        <span id="topbar-cl">Full Access</span>
+  <!-- MAIN APP BODY -->
+  <main>
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          color="var(--blue)">
+          <polygon points="12 2 2 7 12 12 22 7 12 2" />
+          <polyline points="2 17 12 22 22 17" />
+          <polyline points="2 12 12 17 22 12" />
+        </svg>
+        <span>Copilot Assistant</span>
       </div>
-      <div class="topbar-pill" id="topbar-role-pill" style="display:flex">
-        <span id="topbar-role-txt">Admin</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ASSISTANT VIEW -->
-  <section class="view active" id="view-assistant">
-    <div class="chat-shell">
-      <div class="chat-stream" id="chat-stream">
-        <div class="chat-col" id="chat-col"></div>
-      </div>
-      <div class="input-dock">
-        <div class="input-frame">
-          <div class="input-row">
-            <input type="text" class="chat-input" id="chat-input"
-              placeholder="Ask about company operations, policies, or records..."
-              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"
-              autocomplete="off" spellcheck="false">
-            <button class="btn-send" id="btn-send" onclick="sendChat()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-              </svg>
-            </button>
-          </div>
-          <div class="input-sub">Responses are filtered to your role and clearance level.</div>
+      <div class="topbar-meta">
+        <div class="topbar-pill">
+          <div class="pip"></div>
+          <span id="topbar-cl">Full C-Suite Access</span>
+        </div>
+        <div class="topbar-pill">
+          <span id="topbar-role-txt">Admin</span>
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- DATABASE VIEW -->
-  <section class="view" id="view-database">
-    <div class="db-shell">
-      <!-- Table panel -->
-      <div class="db-left">
-        <div class="db-hdr">
-          <div class="db-hdr-title">Database</div>
-          <button class="btn-cta hidden" id="btn-add" onclick="openModal('m-upload')">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add file
-          </button>
-        </div>
-        <div class="db-filters">
-          <div class="srch-wrap">
-            <svg class="srch-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input class="db-search" id="db-search" type="text" placeholder="Search records..." oninput="loadRecords()">
+    <!-- VIEW 1: COPILOT ASSISTANT -->
+    <section class="view active" id="view-assistant">
+      <div class="chat-shell">
+        <!-- Chat toolbar (scope and format fixed: role decides source, all formats) -->
+        <div class="chat-control-dock">
+          <div style="margin-left:auto;font-size:10.5px;color:var(--t3)" id="chat-scope-hint">
+            Filtered by your role
           </div>
-          <select class="db-sel" id="db-dept" onchange="loadRecords()">
-            <option value="All">All departments</option>
-            <option value="Executive">Executive</option>
-            <option value="Sales">Sales</option>
-            <option value="Finance">Finance</option>
-            <option value="Operations">Operations</option>
-            <option value="Engineering">Engineering</option>
-            <option value="Legal">Legal</option>
-            <option value="HR">HR</option>
+        </div>
+
+        <!-- Messages Stream -->
+        <div class="chat-stream" id="chat-stream">
+          <div class="chat-col" id="chat-col"></div>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="input-dock">
+          <div class="input-frame">
+            <div class="input-row">
+              <input type="text" class="chat-input" id="chat-input" placeholder="Ask a question…"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"
+                autocomplete="off" spellcheck="false">
+              <button class="btn-send" id="btn-send" onclick="sendChat()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+              </button>
+            </div>
+            <div class="input-sub">
+              <span>Only records you can access are used.</span>
+              <span id="chat-status-indicator">Ready</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: ENTERPRISE DATA MANAGEMENT SYSTEM -->
+    <section class="view" id="view-database">
+      <div class="db-shell">
+        <div class="db-left">
+
+          <!-- KPI Metrics Ribbon -->
+          <div class="kpi-ribbon" id="kpi-ribbon">
+            <div class="kpi-card">
+              <span class="kpi-lbl">Total Documents</span>
+              <span class="kpi-num hi-blue" id="kpi-total">-</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-lbl">Synthetic Data</span>
+              <span class="kpi-num hi-purple" id="kpi-synth">-</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-lbl">Original Vault</span>
+              <span class="kpi-num hi-green" id="kpi-vault">-</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-lbl">PDF Documents</span>
+              <span class="kpi-num" id="kpi-pdf">-</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-lbl">Markdown Notes</span>
+              <span class="kpi-num" id="kpi-md">-</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-lbl">Audit Flagged</span>
+              <span class="kpi-num hi-red" id="kpi-flagged">-</span>
+            </div>
+          </div>
+
+          <!-- Scope Switcher & Search Bar -->
+          <div class="db-control-bar">
+            <div class="scope-toggle" id="scope-selector">
+              <button class="scope-btn active" data-scope="all" onclick="setDbScope('all')">🌐 All Data</button>
+              <button class="scope-btn" data-scope="synthetic" onclick="setDbScope('synthetic')">🧪 Synthetic
+                Only</button>
+              <button class="scope-btn" data-scope="vault" onclick="setDbScope('vault')">🏢 Non-Synthetic Vault</button>
+            </div>
+
+            <div class="filter-actions">
+              <div class="srch-wrap">
+                <svg class="srch-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input class="db-search" id="db-search" type="text"
+                  placeholder="Search title, content, ID, author...  ( / )" oninput="onSearchInput()"
+                  onfocus="onSearchFocus()" onkeydown="onSearchKeydown(event)" autocomplete="off" spellcheck="false"
+                  role="combobox" aria-expanded="false" aria-label="Search records">
+                <button class="search-clear" id="search-clear" title="Clear search"
+                  onclick="clearSearchKeyword()">✕</button>
+                <span class="search-kbd">/</span>
+                <div class="suggest-panel" id="suggest-panel" role="listbox"></div>
+              </div>
+              <select class="db-sel" id="db-dept" onchange="loadRecords()">
+                <option value="All">All Departments</option>
+                <option value="Corporate Operations">Corporate Operations</option>
+                <option value="Finance & Accounting Audit">Finance & Accounting</option>
+                <option value="Trading & Risk Management">Trading & Risk</option>
+                <option value="Engineering & IT Systems">Engineering & IT</option>
+                <option value="Legal & Regulatory Compliance">Legal & Compliance</option>
+                <option value="Executive Leadership">Executive Leadership</option>
+                <option value="Customer Support & Success">Customer Support</option>
+              </select>
+              <select class="db-sel" id="db-cl" onchange="loadRecords()">
+                <option value="All">All Clearance</option>
+                <option value="Public">Public</option>
+                <option value="Internal">Internal</option>
+                <option value="Confidential">Confidential</option>
+                <option value="Restricted">Restricted</option>
+              </select>
+              <button class="btn-cta" id="btn-add" onclick="openModal('m-upload')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Upload File
+              </button>
+            </div>
+          </div>
+
+          <!-- Active-filter chips (one-tap remove) -->
+          <div class="chips-row" id="chips-row"></div>
+
+          <!-- Format Filter Tabs & Layout Mode Switcher -->
+          <div class="format-bar">
+            <div class="fmt-tabs">
+              <button class="fmt-tab active" data-fmt="all" onclick="setDbFormat('all')">
+                All Formats <span class="badge-cnt" id="cnt-fmt-all">-</span>
+              </button>
+              <button class="fmt-tab" data-fmt="pdf" onclick="setDbFormat('pdf')">
+                📄 PDFs <span class="badge-cnt" id="cnt-fmt-pdf">-</span>
+              </button>
+              <button class="fmt-tab" data-fmt="md" onclick="setDbFormat('md')">
+                📝 Markdown (.md) <span class="badge-cnt" id="cnt-fmt-md">-</span>
+              </button>
+              <button class="fmt-tab" data-fmt="csv" onclick="setDbFormat('csv')">
+                📊 Spreadsheets (.csv) <span class="badge-cnt" id="cnt-fmt-csv">-</span>
+              </button>
+              <button class="fmt-tab" data-fmt="txt" onclick="setDbFormat('txt')">
+                📃 Plain Text (.txt) <span class="badge-cnt" id="cnt-fmt-txt">-</span>
+              </button>
+              <button class="fmt-tab" data-fmt="json" onclick="setDbFormat('json')">
+                ⚙️ JSON <span class="badge-cnt" id="cnt-fmt-json">-</span>
+              </button>
+            </div>
+
+            <div class="layout-switch">
+              <button class="l-btn active" id="btn-l-table" title="Table View" onclick="setLayoutMode('table')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="8" y1="6" x2="21" y2="6" />
+                  <line x1="8" y1="12" x2="21" y2="12" />
+                  <line x1="8" y1="18" x2="21" y2="18" />
+                  <line x1="3" y1="6" x2="3.01" y2="6" />
+                  <line x1="3" y1="12" x2="3.01" y2="12" />
+                  <line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
+              </button>
+              <button class="l-btn" id="btn-l-grid" title="Document Card Grid" onclick="setLayoutMode('grid')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Document Viewer Content Area -->
+          <div class="db-content-area" id="db-content-area">
+            <!-- Table View Container -->
+            <div class="tbl-wrap" id="view-mode-table">
+              <table class="rt">
+                <thead>
+                  <tr>
+                    <th style="width:115px">Record ID</th>
+                    <th style="width:80px">Source</th>
+                    <th style="width:75px">Format</th>
+                    <th>Document Title</th>
+                    <th style="width:140px">Department</th>
+                    <th style="width:90px">Clearance</th>
+                    <th style="width:85px" id="th-actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="rtbody">
+                  <tr>
+                    <td colspan="7" class="tbl-msg">Loading records...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Card Grid View Container -->
+            <div class="card-grid hidden" id="view-mode-grid"></div>
+          </div>
+
+          <!-- Footer Pagination/Status -->
+          <div class="db-foot">
+            <span id="db-count">Loading…</span>
+            <span>Access: <strong id="db-role-scope">Full access</strong> &nbsp;·&nbsp; <span
+                title="Press / to focus search, Ctrl/⌘ K for the command palette">Press <strong>/</strong> to search ·
+                <strong>⌘K</strong> commands</span></span>
+          </div>
+        </div>
+
+        <!-- Right Detail / Inspection Drawer -->
+        <div class="db-right closed" id="db-right">
+          <div class="dp-inner">
+            <div class="dp-hdr">
+              <h3 id="dp-title">Document Inspection</h3>
+              <button class="dp-close" onclick="closeDetail()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div class="dp-body" id="dp-body">
+              <!-- Populated dynamically based on document format -->
+            </div>
+            <div class="dp-foot" id="dp-foot"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: UPLOAD FILE -->
+  <div class="overlay" id="m-upload">
+    <div class="modal">
+      <div class="m-hd">
+        <h3>Add document</h3>
+        <button class="dp-close" onclick="closeModal('m-upload')">✕</button>
+      </div>
+      <form id="upload-form" onsubmit="handleUpload(event)">
+        <div class="m-body">
+          <div class="fg">
+            <label class="fl">Supported Files (.pdf, .md, .csv, .txt, .json)</label>
+            <input type="file" class="fc" id="upload-file" accept=".pdf,.md,.csv,.txt,.json,.jsonl" required>
+          </div>
+          <div class="fg">
+            <label class="fl">Department</label>
+            <select class="fc" id="upload-dept">
+              <option value="Corporate Operations">Corporate Operations</option>
+              <option value="Executive Leadership">Executive Leadership</option>
+              <option value="Finance & Accounting Audit">Finance & Accounting Audit</option>
+              <option value="Trading & Risk Management">Trading & Risk Management</option>
+              <option value="Engineering & IT Systems">Engineering & IT Systems</option>
+              <option value="Legal & Regulatory Compliance">Legal & Regulatory Compliance</option>
+              <option value="Customer Support & Success">Customer Support & Success</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Clearance Level</label>
+            <select class="fc" id="upload-cl">
+              <option value="Internal">Internal</option>
+              <option value="Public">Public</option>
+              <option value="Confidential">Confidential</option>
+              <option value="Restricted">Restricted</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Synthesis Detail Level - how much detail the synthetic copy keeps</label>
+            <select class="fc" id="upload-fidelity">
+              <option value="balanced">Balanced - key facts kept</option>
+              <option value="full">Full - keep everything</option>
+              <option value="minimal">Minimal - short summary, maximum privacy</option>
+            </select>
+          </div>
+          <div class="up-st" id="up-st"></div>
+        </div>
+        <div class="m-foot">
+          <button type="button" class="btn-ghost" onclick="closeModal('m-upload')">Cancel</button>
+          <button type="submit" class="btn-ok" id="btn-up">Ingest & Re-index</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT RECORD (ADMIN) -->
+  <div class="overlay" id="m-edit">
+    <div class="modal">
+      <div class="m-hd">
+        <h3>Edit record</h3>
+        <button class="dp-close" onclick="closeModal('m-edit')">✕</button>
+      </div>
+      <div class="m-body">
+        <input type="hidden" id="edit-id">
+        <div class="fg">
+          <label class="fl">Title</label>
+          <input type="text" class="fc" id="edit-title">
+        </div>
+        <div class="fg">
+          <label class="fl">Content</label>
+          <textarea class="fc" id="edit-content" rows="6"></textarea>
+        </div>
+        <div class="fg">
+          <label class="fl">Department</label>
+          <select class="fc" id="edit-dept">
+            <option value="Corporate Operations">Corporate Operations</option>
+            <option value="Executive Leadership">Executive Leadership</option>
+            <option value="Finance & Accounting Audit">Finance & Accounting Audit</option>
+            <option value="Trading & Risk Management">Trading & Risk Management</option>
+            <option value="Engineering & IT Systems">Engineering & IT Systems</option>
+            <option value="Legal & Regulatory Compliance">Legal & Regulatory Compliance</option>
+            <option value="Customer Support & Success">Customer Support & Success</option>
           </select>
-          <select class="db-sel" id="db-cl" onchange="loadRecords()">
-            <option value="All">All clearance</option>
+        </div>
+        <div class="fg">
+          <label class="fl">Clearance Level</label>
+          <select class="fc" id="edit-cl">
             <option value="Public">Public</option>
             <option value="Internal">Internal</option>
             <option value="Confidential">Confidential</option>
             <option value="Restricted">Restricted</option>
           </select>
-          <select class="db-sel" id="db-flag" onchange="loadRecords()">
-            <option value="All">All status</option>
-            <option value="Flagged">Flagged</option>
-            <option value="Clean">Clean</option>
-          </select>
-        </div>
-
-        <div class="tbl-wrap">
-          <table class="rt">
-            <thead>
-              <tr>
-                <th style="width:105px">Record ID</th>
-                <th>Title</th>
-                <th style="width:130px">Department</th>
-                <th style="width:90px">Clearance</th>
-                <th style="width:70px">Status</th>
-                <th style="width:80px">Type</th>
-                <th style="width:90px" id="th-actions"></th>
-              </tr>
-            </thead>
-            <tbody id="rtbody">
-              <tr><td colspan="7" class="tbl-msg">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="db-foot">
-          <span id="db-count">Loading</span>
-          <span>Synthetic data · PII removed</span>
-        </div>
-      </div>
-
-      <!-- Detail / Edit panel -->
-      <div class="db-right closed" id="db-right">
-        <div class="dp-inner">
-          <div class="dp-hdr">
-            <h3 id="dp-title">Record Detail</h3>
-            <button class="dp-close" onclick="closeDetail()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-          <div class="dp-body" id="dp-body">
-            <!-- filled by JS -->
-          </div>
-          <div class="dp-foot" id="dp-foot">
-            <!-- edit/delete buttons injected per role -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
-
-<!-- MODAL: UPLOAD -->
-<div class="overlay" id="m-upload">
-  <div class="modal">
-    <div class="m-hd">
-      <h3>Add a corporate file</h3>
-      <p>Ingested into the knowledge vault; search index rebuilds automatically.</p>
-    </div>
-    <form id="upload-form" onsubmit="handleUpload(event)">
-      <div class="m-body">
-        <div class="fg">
-          <label class="fl">Document (.csv, .pdf, .json, .txt)</label>
-          <input type="file" class="fc" id="upload-file" accept=".csv,.pdf,.json,.jsonl,.txt,.md" required>
         </div>
         <div class="fg">
-          <label class="fl">Department</label>
-          <select class="fc" id="upload-dept">
-            <option value="Operations">Operations</option>
-            <option value="Executive">Executive</option>
-            <option value="Sales">Sales</option>
-            <option value="Finance">Finance</option>
-            <option value="Engineering">Engineering</option>
-            <option value="Legal">Legal</option>
-            <option value="HR">HR</option>
+          <label class="fl">Status</label>
+          <select class="fc" id="edit-flag">
+            <option value="0">Clean</option>
+            <option value="1">Flagged</option>
           </select>
         </div>
-        <div class="fg">
-          <label class="fl">Clearance level</label>
-          <select class="fc" id="upload-cl">
-            <option value="Internal">Internal: standard operations</option>
-            <option value="Confidential">Confidential: departmental only</option>
-            <option value="Restricted">Restricted: executive only</option>
-          </select>
-        </div>
-        <div class="up-st" id="up-st"></div>
+        <div class="up-st" id="edit-st"></div>
       </div>
       <div class="m-foot">
-        <button type="button" class="btn-ghost" onclick="closeModal('m-upload')">Cancel</button>
-        <button type="submit" class="btn-ok" id="btn-up">Upload and ingest</button>
+        <button class="btn-ghost" onclick="closeModal('m-edit')">Cancel</button>
+        <button class="btn-ok" id="btn-save-edit" onclick="submitEdit()">Save Changes</button>
       </div>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL: EDIT RECORD -->
-<div class="overlay" id="m-edit">
-  <div class="modal">
-    <div class="m-hd">
-      <h3>Edit record</h3>
-      <p>Only synthetic data. Changes are saved to the local database immediately.</p>
-    </div>
-    <div class="m-body">
-      <input type="hidden" id="edit-id">
-      <div class="fg">
-        <label class="fl">Title</label>
-        <input type="text" class="fc" id="edit-title">
-      </div>
-      <div class="fg">
-        <label class="fl">Content</label>
-        <textarea class="fc" id="edit-content" rows="4"></textarea>
-      </div>
-      <div class="fg">
-        <label class="fl">Department</label>
-        <select class="fc" id="edit-dept">
-          <option value="Operations">Operations</option>
-          <option value="Executive">Executive</option>
-          <option value="Sales">Sales</option>
-          <option value="Finance">Finance</option>
-          <option value="Engineering">Engineering</option>
-          <option value="Legal">Legal</option>
-          <option value="HR">HR</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label class="fl">Clearance level</label>
-        <select class="fc" id="edit-cl">
-          <option value="Public">Public</option>
-          <option value="Internal">Internal</option>
-          <option value="Confidential">Confidential</option>
-          <option value="Restricted">Restricted</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label class="fl">Compliance status</label>
-        <select class="fc" id="edit-flag">
-          <option value="0">Clean</option>
-          <option value="1">Flagged for review</option>
-        </select>
-      </div>
-      <div class="up-st" id="edit-st"></div>
-    </div>
-    <div class="m-foot">
-      <button class="btn-ghost" onclick="closeModal('m-edit')">Cancel</button>
-      <button class="btn-ok" id="btn-save-edit" onclick="submitEdit()">Save changes</button>
     </div>
   </div>
-</div>
 
-<!-- MODAL: DELETE CONFIRM -->
-<div class="overlay" id="m-delete">
-  <div class="modal" style="max-width:380px">
-    <div class="m-hd">
-      <h3>Delete record</h3>
-      <p>This action permanently removes the record from the database.</p>
-    </div>
-    <div class="m-body">
-      <div class="del-warn">This cannot be undone. The record and all associated data will be permanently deleted.</div>
-      <p style="font-size:12px;color:var(--t2)">Record: <span id="del-label" style="font-family:var(--mono);font-size:11px"></span></p>
-    </div>
-    <div class="m-foot">
-      <button class="btn-ghost" onclick="closeModal('m-delete')">Cancel</button>
-      <button class="btn-danger" onclick="submitDelete()">Delete permanently</button>
+  <!-- MODAL: DELETE CONFIRM -->
+  <div class="overlay" id="m-delete">
+    <div class="modal" style="max-width:380px">
+      <div class="m-hd">
+        <h3>Delete record?</h3>
+        <button class="dp-close" onclick="closeModal('m-delete')">✕</button>
+      </div>
+      <div class="m-body">
+        <div class="del-warn">This permanently removes the record.</div>
+        <p style="font-size:12px;color:var(--t2)">Record: <span id="del-label"
+            style="font-family:var(--mono);font-size:11px"></span></p>
+      </div>
+      <div class="m-foot">
+        <button class="btn-ghost" onclick="closeModal('m-delete')">Cancel</button>
+        <button class="btn-danger" onclick="submitDelete()">Delete Permanently</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- MODAL: SWITCH USER -->
-<div class="overlay" id="m-role">
-  <div class="modal">
-    <div class="m-hd">
-      <h3>Switch user profile</h3>
-      <p>Updates your knowledge scope and access permissions immediately.</p>
-    </div>
-    <div class="m-body">
-      <div class="rc sel" id="card-admin" onclick="setUser('admin')">
-        <div class="rc-av" style="color:var(--red)">VS</div>
-        <div class="rc-info">
-          <div class="rc-name">Victoria Sterling</div>
-          <div class="rc-role rcr-Admin">Admin</div>
-          <div class="rc-desc">Full access: assistant, database, edit, delete, file upload</div>
+  <!-- MODAL: FULL DOCUMENT INSPECTION (FORMAT-AWARE) -->
+  <div class="overlay" id="m-inspect">
+    <div class="modal modal-lg">
+      <div class="m-hd">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge-fmt bf-pdf" id="mi-fmt">PDF</span>
+          <span class="badge-src bs-vault" id="mi-src">Vault</span>
+          <h3 id="mi-title">Document Inspection</h3>
         </div>
+        <button class="dp-close" onclick="closeModal('m-inspect')">✕</button>
       </div>
-      <div class="rc" id="card-manager" onclick="setUser('manager')">
-        <div class="rc-av" style="color:var(--blue)">MV</div>
-        <div class="rc-info">
-          <div class="rc-name">Marcus Vance</div>
-          <div class="rc-role rcr-Manager">Manager</div>
-          <div class="rc-desc">Department access: assistant, database view, file upload</div>
-        </div>
+      <div class="m-body" id="mi-body">
+        <!-- Full-screen format viewer injected by JS -->
       </div>
-      <div class="rc" id="card-analyst" onclick="setUser('analyst')">
-        <div class="rc-av" style="color:var(--purple)">PN</div>
-        <div class="rc-info">
-          <div class="rc-name">Priya Nair</div>
-          <div class="rc-role rcr-Analyst">Analyst</div>
-          <div class="rc-desc">Read-only: assistant and full database view</div>
-        </div>
+      <div class="m-foot">
+        <button class="btn-ghost" onclick="copyDocumentText()">Copy Content</button>
+        <button class="btn-ok" onclick="closeModal('m-inspect')">Close Viewer</button>
       </div>
-      <div class="rc" id="card-employee" onclick="setUser('employee')">
-        <div class="rc-av" style="color:var(--t3)">JS</div>
-        <div class="rc-info">
-          <div class="rc-name">Jordan Smith</div>
-          <div class="rc-role rcr-Employee">Employee</div>
-          <div class="rc-desc">Assistant only — no direct database access</div>
-        </div>
-      </div>
-    </div>
-    <div class="m-foot">
-      <button class="btn-ghost" onclick="closeModal('m-role')">Close</button>
     </div>
   </div>
-</div>
 
-<script>
-const P = {
-  admin: {
-    key:'admin',av:'VS',name:'Victoria Sterling',role:'Admin',dept:'Executive',
-    greeting:'Good morning,',greetingName:'Victoria.',
-    desc:'You have full system access. Ask the assistant anything, or switch to the Database view to view, edit, or delete records.',
-    db:true,up:true,canEdit:true,
-    sugg:['Show me all records flagged for compliance review','Summarize outstanding risk items across departments','Which employees have restricted-level clearance?']
-  },
-  manager: {
-    key:'manager',av:'MV',name:'Marcus Vance',role:'Manager',dept:'Sales',
-    greeting:'Welcome back,',greetingName:'Marcus.',
-    desc:'Query operations, workflows, and approvals within your department. Add files to expand the knowledge base.',
-    db:true,up:true,canEdit:false,
-    sugg:['What are the open deals in the sales pipeline?','Summarize recent policy changes for my department','What approval is required for budget overruns?']
-  },
-  analyst: {
-    key:'analyst',av:'PN',name:'Priya Nair',role:'Analyst',dept:'Finance',
-    greeting:'Hello,',greetingName:'Priya.',
-    desc:'View all database records and query the assistant for insights across departments.',
-    db:true,up:false,canEdit:false,
-    sugg:['Show me spending trends across departments','What compliance issues are outstanding this quarter?','Summarize all flagged audit records']
-  },
-  employee: {
-    key:'employee',av:'JS',name:'Jordan Smith',role:'Employee',dept:'Operations',
-    greeting:'Hello,',greetingName:'Jordan.',
-    desc:'Ask the assistant about company policies, procedures, and operational guidance.',
-    db:false,up:false,canEdit:false,
-    sugg:['What is the expense reimbursement procedure?','How do I request time off?','What are the data handling guidelines for my role?']
-  },
-};
+  <!-- COMMAND PALETTE (Cmd/Ctrl+K): actions + record jump -->
+  <div class="pal-overlay" id="pal-overlay">
+    <div class="pal-modal">
+      <div class="pal-input-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          color="var(--t3)">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input class="pal-input" id="pal-input" type="text" placeholder="Type a command or search records..."
+          autocomplete="off" spellcheck="false" oninput="onPaletteInput()" onkeydown="onPaletteKeydown(event)">
+        <span class="search-kbd" style="position:static">esc</span>
+      </div>
+      <div class="pal-list" id="pal-list"></div>
+      <div class="pal-foot"><span>↑↓ navigate</span><span>↵ open</span><span>esc close</span></div>
+    </div>
+  </div>
 
-let cur = P.admin;
-let busy = false;
-let pendingDeleteId = null;
-let selectedRowId = null;
+  <!-- MODAL: SWITCH ROLE PROFILE -->
+  <div class="overlay" id="m-role">
+    <div class="modal">
+      <div class="m-hd">
+        <h3>Switch profile</h3>
+        <button class="dp-close" onclick="closeModal('m-role')">✕</button>
+      </div>
+      <div class="m-body">
+        <div class="rc sel" id="card-employee" onclick="setUser('employee')">
+          <div class="rc-av" style="color:var(--t2)">AS</div>
+          <div class="rc-info">
+            <div class="rc-name">Aarav Sharma</div>
+            <div class="u-role role-Employee">Employee</div>
+            <div class="rc-desc">Guidance and handbooks</div>
+          </div>
+        </div>
+        <div class="rc" id="card-admin" onclick="setUser('admin')">
+          <div class="rc-av" style="color:var(--red)">AR</div>
+          <div class="rc-info">
+            <div class="rc-name">Aditya Rao</div>
+            <div class="u-role role-Admin">Admin</div>
+            <div class="rc-desc">Full access</div>
+          </div>
+        </div>
+        <div class="rc" id="card-manager" onclick="setUser('manager')">
+          <div class="rc-av" style="color:var(--blue)">RV</div>
+          <div class="rc-info">
+            <div class="rc-name">Rohan Verma</div>
+            <div class="u-role role-Manager">Manager</div>
+            <div class="rc-desc">Department records</div>
+          </div>
+        </div>
+        <div class="rc" id="card-analyst" onclick="setUser('analyst')">
+          <div class="rc-av" style="color:var(--purple)">AI</div>
+          <div class="rc-info">
+            <div class="rc-name">Ananya Iyer</div>
+            <div class="u-role role-Analyst">Analyst</div>
+            <div class="rc-desc">Audits and trends</div>
+          </div>
+        </div>
+      </div>
+      <div class="m-foot">
+        <button class="btn-ghost" onclick="closeModal('m-role')">Close</button>
+      </div>
+    </div>
+  </div>
 
-document.addEventListener('DOMContentLoaded', () => applyProfile(cur));
+  <script>
+    const P = {
+      admin: {
+        key: 'admin', av: 'AR', name: 'Aditya Rao', role: 'Admin', dept: 'Executive Leadership',
+        greeting: 'Good morning,', greetingName: 'Aditya.',
+        desc: 'Full access. Ask about any records.',
+        db: true, up: true, canEdit: true,
+        scopeDesc: 'Full access',
+        sugg: [
+          'Show flagged compliance records',
+          'Summarize recent meeting decisions'
+        ]
+      },
+      manager: {
+        key: 'manager', av: 'RV', name: 'Rohan Verma', role: 'Manager', dept: 'Trading & Risk Management',
+        greeting: 'Welcome back,', greetingName: 'Rohan.',
+        desc: 'Your department records up to Confidential.',
+        db: true, up: true, canEdit: false,
+        scopeDesc: 'Department access',
+        sugg: [
+          'What are our trading risk limits?',
+          'Summarize Q3 memos for our department'
+        ]
+      },
+      analyst: {
+        key: 'analyst', av: 'AI', name: 'Ananya Iyer', role: 'Analyst', dept: 'Finance & Accounting Audit',
+        greeting: 'Hello,', greetingName: 'Ananya.',
+        desc: 'Cross-department records for audits and trends.',
+        db: true, up: false, canEdit: false,
+        scopeDesc: 'Audit access',
+        sugg: [
+          'What audit flags were detected?',
+          'List meeting notes with recommendations'
+        ]
+      },
+      employee: {
+        key: 'employee', av: 'AS', name: 'Aarav Sharma', role: 'Employee', dept: 'Corporate Operations',
+        greeting: 'Hello,', greetingName: 'Aarav.',
+        desc: 'Public and Internal guidance and handbooks.',
+        db: true, up: false, canEdit: false,
+        scopeDesc: 'Standard access',
+        sugg: [
+          'What is the time-off policy?',
+          'Summarize the company mission'
+        ]
+      },
+    };
 
-function setUser(k) {
-  cur = P[k];
-  document.querySelectorAll('.rc').forEach(c => c.classList.remove('sel'));
-  document.getElementById('card-'+k).classList.add('sel');
-  closeModal('m-role');
-  applyProfile(cur);
-  if (!cur.db) showView('assistant');
-  closeDetail();
-}
+    let cur = P.employee;
+    let busy = false;
+    let currentScope = 'all';
+    let currentFormat = 'all';
+    let currentLayout = 'table';
+    let pendingDeleteId = null;
+    let selectedRowId = null;
+    let cachedActiveDoc = null;
+    let searchDebounceTimer = null;
+    let suggestTimer = null;
+    let suggestItems = [];
+    let suggestActive = -1;
+    let suggestMode = 'results';
+    let palItems = [];
+    let palActive = 0;
+    let palTimer = null;
 
-function applyProfile(p) {
-  document.getElementById('av-mono').textContent = p.av;
-  document.getElementById('av-name').textContent = p.name;
-  const rt = document.getElementById('av-role');
-  rt.textContent = p.role;
-  rt.className = 'u-role role-'+p.role;
-  document.getElementById('topbar-cl').textContent = p.role === 'Admin' ? 'Full Access' :
-    p.role === 'Manager' ? 'Dept Access' :
-    p.role === 'Analyst' ? 'Read Only' : 'Standard';
-  document.getElementById('topbar-role-txt').textContent = p.role;
-  document.getElementById('nav-database').classList.toggle('hidden', !p.db);
-  const ba = document.getElementById('btn-add');
-  if(ba) ba.classList.toggle('hidden', !p.up);
-  const tha = document.getElementById('th-actions');
-  if(tha) tha.textContent = p.canEdit ? 'Actions' : '';
-  resetChat();
-}
+    document.addEventListener('DOMContentLoaded', () => {
+      syncProfileWithServer();
+    });
 
-function showView(id) {
-  if(id==='database' && !cur.db) return;
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('view-'+id).classList.add('active');
-  document.getElementById('nav-'+id).classList.add('active');
-  document.getElementById('topbar-title').textContent = id === 'database' ? 'Database' : 'Assistant';
-  if(id === 'database') loadRecords();
-}
-
-/* ── CHAT ── */
-function resetChat() {
-  const col = document.getElementById('chat-col');
-  col.innerHTML = '';
-  const w = document.createElement('div');
-  w.className = 'welcome';
-  w.innerHTML = `
-    <div class="w-greeting">${esc(cur.greeting)} <em>${esc(cur.greetingName)}</em></div>
-    <div class="w-desc">${esc(cur.desc)}</div>
-    <div class="sugg-label">You might ask</div>
-    <div class="sugg-list">${(cur.sugg||[]).map(s=>`<div class="sugg-item" onclick="sendSugg(this)">${esc(s)}</div>`).join('')}</div>`;
-  col.appendChild(w);
-}
-
-function sendSugg(el){ document.getElementById('chat-input').value=el.textContent.trim(); sendChat(); }
-
-async function sendChat() {
-  if(busy) return;
-  const inp = document.getElementById('chat-input');
-  const q = inp.value.trim();
-  if(!q) return;
-  inp.value=''; busy=true;
-  document.getElementById('btn-send').disabled=true;
-  document.querySelector('.welcome')?.remove();
-  const col = document.getElementById('chat-col');
-  const um = document.createElement('div');
-  um.className='msg user';
-  um.innerHTML=`<div class="bbl">${esc(q)}</div>`;
-  col.appendChild(um); scrollBot();
-  const ld = document.createElement('div');
-  ld.className='msg assistant';
-  ld.innerHTML=`<div class="bbl"><div class="msg-label">Searching records</div><div class="msg-body"><div class="tdots"><span></span><span></span><span></span></div></div></div>`;
-  col.appendChild(ld); scrollBot();
-  try {
-    const res = await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({question:q,role:cur.role,department:cur.dept})});
-    const d = await res.json();
-    ld.remove();
-    let src='';
-    if(d.sources?.length){
-      src='<div class="sources">';
-      d.sources.forEach(s=>{
-        const fl=s.compliance_label===1;
-        src+=`<span class="src-ref${fl?' flagged':''}">[${s.id||'?'}] ${s.department||''} · ${s.clearance||''}${fl?' flag':''}</span>`;
-      });
-      src+='</div>';
+    async function syncProfileWithServer() {
+      try {
+        const res = await fetch('/api/session');
+        const d = await res.json();
+        if (res.ok && d.authenticated && d.user) {
+          const key = (d.user.role || 'Employee').toLowerCase();
+          if (P[key]) {
+            cur = P[key];
+            document.querySelectorAll('.rc').forEach(c => c.classList.remove('sel'));
+            const card = document.getElementById('card-' + key);
+            if (card) card.classList.add('sel');
+          }
+        }
+      } catch (e) { /* fall back to least-privilege default */ }
+      applyProfile(cur);
     }
-    const am=document.createElement('div');
-    am.className='msg assistant';
-    am.innerHTML=`<div class="bbl"><div class="msg-label">Corporate AI</div><div class="msg-body">${fmt(d.answer||'No response.')}</div>${src}</div>`;
-    col.appendChild(am);
-  } catch(e) {
-    ld.remove();
-    const em=document.createElement('div');
-    em.className='msg assistant';
-    em.innerHTML=`<div class="bbl"><div class="msg-label err-lbl">Error</div><div class="msg-body" style="color:var(--red)">${esc(e.message)}</div></div>`;
-    col.appendChild(em);
-  }
-  busy=false; document.getElementById('btn-send').disabled=false; scrollBot();
-}
 
-function scrollBot(){ const s=document.getElementById('chat-stream'); s.scrollTop=s.scrollHeight; }
+    function setUser(k) {
+      cur = P[k];
+      document.querySelectorAll('.rc').forEach(c => c.classList.remove('sel'));
+      document.getElementById('card-' + k).classList.add('sel');
+      closeModal('m-role');
+      applyProfile(cur);
+      closeDetail();
+    }
 
-function fmt(text){
-  let h=esc(text);
-  h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  h=h.replace(/\*(.+?)\*/g,'<em>$1</em>');
-  h=h.replace(/`([^`]+)`/g,'<code>$1</code>');
-  h=h.replace(/^[\-\*] (.+)$/gm,'<li>$1</li>');
-  h=h.replace(/((<li>.*<\/li>\n?)+)/g,'<ul>$1</ul>');
-  h=h.split(/\n\n+/).map(p=>p.trim()?`<p>${p.replace(/\n/g,'<br>')}</p>`:'').join('');
-  return h||`<p>${esc(text)}</p>`;
-}
+    function applyProfile(p) {
+      document.getElementById('av-mono').textContent = p.av;
+      document.getElementById('av-name').textContent = p.name;
+      const rt = document.getElementById('av-role');
+      rt.textContent = p.role;
+      rt.className = 'u-role role-' + p.role;
 
-/* ── DATABASE ── */
-async function loadRecords() {
-  if(!cur.db) return;
-  const kw = document.getElementById('db-search').value;
-  const dept = document.getElementById('db-dept').value;
-  const cl = document.getElementById('db-cl').value;
-  const flag = document.getElementById('db-flag').value;
-  const tb = document.getElementById('rtbody');
-  tb.innerHTML='<tr><td colspan="7" class="tbl-msg">Loading...</td></tr>';
-  selectedRowId=null; closeDetail();
-  try {
-    const url=`/api/records?role=${encodeURIComponent(cur.role)}&department=${encodeURIComponent(cur.dept)}&keyword=${encodeURIComponent(kw)}&dept_filter=${encodeURIComponent(dept)}&clearance_filter=${encodeURIComponent(cl)}&compliance_filter=${encodeURIComponent(flag)}`;
-    const res=await fetch(url);
-    if(res.status===403){tb.innerHTML='<tr><td colspan="7" class="tbl-msg err">Access denied for your role.</td></tr>';return}
-    const recs=await res.json();
-    document.getElementById('db-count').textContent=recs.length+' record'+(recs.length!==1?'s':'')+' loaded';
-    if(!recs.length){tb.innerHTML='<tr><td colspan="7" class="tbl-msg">No records found.</td></tr>';return}
-    tb.innerHTML=recs.map(r=>{
-      const rid=esc(r.id||'?');
-      const cl=esc(r.clearance_level||'Internal');
-      const flagged=r.compliance_label===1||r.compliance_label==='1';
-      const actions=cur.canEdit?`<td class="tbl-act">
-        <button class="btn-row edit" onclick="event.stopPropagation();openEdit('${rid}')">Edit</button>
-        <button class="btn-row del" onclick="event.stopPropagation();openDeleteConfirm('${rid}','${esc(r.title||r.id)}')">Delete</button>
-      </td>`:'<td></td>';
-      return `<tr class="clickable" id="tr-${rid}" onclick="showDetail('${rid}')">
-        <td><span class="rid">${rid}</span></td>
-        <td><span class="rtitle" title="${esc(r.title||'')}">${esc(r.title||'Enterprise Record')}</span></td>
-        <td><span class="rdept">${esc(r.department||'?')}</span></td>
-        <td><span class="badge badge-${cl}">${cl}</span></td>
-        <td><span class="badge ${flagged?'badge-flagged':'badge-clean'}">${flagged?'Flagged':'Clean'}</span></td>
-        <td style="color:var(--t3);font-size:10px">${esc(r.data_type||'?')}</td>
-        ${actions}
-      </tr>`;
-    }).join('');
-  } catch(e) {
-    tb.innerHTML=`<tr><td colspan="7" class="tbl-msg err">Error: ${esc(e.message)}</td></tr>`;
-  }
-}
+      document.getElementById('topbar-cl').textContent = p.scopeDesc;
+      document.getElementById('topbar-role-txt').textContent = p.role;
+      document.getElementById('db-role-scope').textContent = p.scopeDesc;
 
-/* ── DETAIL PANEL ── */
-async function showDetail(rid) {
-  if(selectedRowId) {
-    const prev=document.getElementById('tr-'+selectedRowId);
-    if(prev) prev.classList.remove('row-selected');
-  }
-  selectedRowId=rid;
-  const row=document.getElementById('tr-'+rid);
-  if(row) row.classList.add('row-selected');
+      const ba = document.getElementById('btn-add');
+      if (ba) ba.classList.toggle('hidden', !p.up);
 
-  const panel=document.getElementById('db-right');
-  panel.classList.remove('closed');
+      const tha = document.getElementById('th-actions');
+      if (tha) tha.textContent = p.canEdit ? 'Actions' : 'Inspect';
 
-  const body=document.getElementById('dp-body');
-  body.innerHTML='<div class="tbl-msg">Loading...</div>';
+      // Only Admin may browse vault data: hide the scope switch for other
+      // roles and lock them to synthetic-only.
+      const scopeSel = document.getElementById('scope-selector');
+      if (scopeSel) scopeSel.classList.toggle('hidden', p.role !== 'Admin');
+      if (p.role !== 'Admin') {
+        setDbScope('synthetic');
+      } else if (!['all', 'synthetic', 'vault'].includes(currentScope)) {
+        setDbScope('all');
+      }
 
-  try {
-    const res=await fetch(`/api/records/${encodeURIComponent(rid)}?role=${encodeURIComponent(cur.role)}`);
-    if(!res.ok) throw new Error('Record not found');
-    const r=await res.json();
+      loadStats();
+      resetChat();
+      if (document.getElementById('view-database').classList.contains('active')) {
+        loadRecords();
+      }
+    }
 
-    document.getElementById('dp-title').textContent=r.title||'Record';
-    const flagged=r.compliance_label===1||r.compliance_label==='1';
-    body.innerHTML=`
-      <div class="dp-field"><div class="dp-lbl">Record ID</div><div class="dp-val mono">${esc(r.id||'?')}</div></div>
-      <div class="dp-field"><div class="dp-lbl">Title</div><div class="dp-val">${esc(r.title||'?')}</div></div>
-      <div class="dp-field"><div class="dp-lbl">Department</div><div class="dp-val">${esc(r.department||'?')}</div></div>
-      <div class="dp-field"><div class="dp-lbl">Type</div><div class="dp-val">${esc(r.data_type||'?')}</div></div>
-      <div class="dp-field"><div class="dp-lbl">Author</div><div class="dp-val mono">${esc(r.author||'?')}</div></div>
-      <div class="dp-field"><div class="dp-lbl">Recipient</div><div class="dp-val mono">${esc(r.recipient||'?')}</div></div>
-      <div class="dp-field"><div class="dp-lbl">Clearance</div><div class="dp-val"><span class="badge badge-${esc(r.clearance_level||'Internal')}">${esc(r.clearance_level||'Internal')}</span></div></div>
-      <div class="dp-field"><div class="dp-lbl">Compliance status</div><div class="dp-val"><span class="badge ${flagged?'badge-flagged':'badge-clean'}">${flagged?'Flagged for review':'Clean'}</span></div></div>
-      <div class="dp-field"><div class="dp-lbl">Created</div><div class="dp-val mono">${esc(String(r.created_at||'?').split('T')[0])}</div></div>
-      <div class="dp-field"><div class="dp-lbl">Content</div><div class="dp-val content">${esc(r.content||'No content available.')}</div></div>
+    function showView(id) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('view-' + id).classList.add('active');
+      document.getElementById('nav-' + id).classList.add('active');
+      document.getElementById('topbar-title').innerHTML = id === 'database' ?
+        `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--blue)"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg><span>Enterprise Data Management</span>` :
+        `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--blue)"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span>Copilot Assistant</span>`;
+      if (id === 'database') {
+        loadStats();
+        loadRecords();
+      }
+    }
+
+    /* ── STATS LOADING ── */
+    async function loadStats() {
+      try {
+        const res = await fetch(`/api/stats?role=${encodeURIComponent(cur.role)}&department=${encodeURIComponent(cur.dept)}`);
+        const s = await res.json();
+        document.getElementById('kpi-total').textContent = (s.total_records || 0).toLocaleString();
+        document.getElementById('kpi-synth').textContent = (s.synthetic_count || 0).toLocaleString();
+        document.getElementById('kpi-vault').textContent = (s.vault_count || 0).toLocaleString();
+        document.getElementById('kpi-flagged').textContent = (s.flagged_count || 0).toLocaleString();
+
+        const fmts = s.format_counts || {};
+        document.getElementById('kpi-pdf').textContent = (fmts.pdf || 0).toLocaleString();
+        document.getElementById('kpi-md').textContent = (fmts.md || 0).toLocaleString();
+
+        document.getElementById('cnt-fmt-all').textContent = (s.total_records || 0).toLocaleString();
+        document.getElementById('cnt-fmt-pdf').textContent = (fmts.pdf || 0).toLocaleString();
+        document.getElementById('cnt-fmt-md').textContent = (fmts.md || 0).toLocaleString();
+        document.getElementById('cnt-fmt-csv').textContent = (fmts.csv || 0).toLocaleString();
+        document.getElementById('cnt-fmt-txt').textContent = (fmts.txt || 0).toLocaleString();
+        document.getElementById('cnt-fmt-json').textContent = (fmts.json || 0).toLocaleString();
+      } catch (e) {
+        console.error('Stats error:', e);
+      }
+    }
+
+    /* ── SCOPE & FORMAT TOGGLING ── */
+    function setDbScope(scope) {
+      if (cur.role !== 'Admin') scope = 'synthetic';
+      currentScope = scope;
+      document.querySelectorAll('.scope-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-scope') === scope);
+      });
+      loadRecords();
+    }
+
+    function setDbFormat(fmt) {
+      currentFormat = fmt;
+      document.querySelectorAll('.fmt-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-fmt') === fmt);
+      });
+      loadRecords();
+    }
+
+    function setLayoutMode(mode) {
+      currentLayout = mode;
+      document.getElementById('btn-l-table').classList.toggle('active', mode === 'table');
+      document.getElementById('btn-l-grid').classList.toggle('active', mode === 'grid');
+      document.getElementById('view-mode-table').classList.toggle('hidden', mode !== 'table');
+      document.getElementById('view-mode-grid').classList.toggle('hidden', mode !== 'grid');
+    }
+
+    function debounceLoadRecords() {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(loadRecords, 200);
+    }
+
+    /* ── SEARCH UX: autocomplete, chips, highlight, recent, palette ── */
+    function onSearchInput() {
+      const inp = document.getElementById('db-search');
+      document.getElementById('search-clear').classList.toggle('show', inp.value.length > 0);
+      debounceLoadRecords();
+      clearTimeout(suggestTimer);
+      suggestTimer = setTimeout(() => fetchSuggest(inp.value.trim()), 180);
+    }
+
+    function onSearchFocus() {
+      const inp = document.getElementById('db-search');
+      document.getElementById('search-clear').classList.toggle('show', inp.value.length > 0);
+      if (!inp.value.trim()) showRecentPanel();
+      else if (inp.value.trim().length >= 2) fetchSuggest(inp.value.trim());
+    }
+
+    function onSearchKeydown(e) {
+      const panel = document.getElementById('suggest-panel');
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (!panel.classList.contains('open') || !suggestItems.length) return;
+        e.preventDefault();
+        const dir = e.key === 'ArrowDown' ? 1 : -1;
+        suggestActive = (suggestActive + dir + suggestItems.length) % suggestItems.length;
+        paintSuggestActive();
+      } else if (e.key === 'Enter') {
+        if (suggestActive >= 0 && suggestItems[suggestActive]) {
+          pickSuggest(suggestActive);
+        } else {
+          const q = document.getElementById('db-search').value.trim();
+          if (q) saveRecent(q);
+          hideSuggest();
+          loadRecords();
+        }
+      } else if (e.key === 'Escape') {
+        hideSuggest();
+      }
+    }
+
+    async function fetchSuggest(q) {
+      if (q.length < 2) { hideSuggest(); return; }
+      try {
+        const params = new URLSearchParams({
+          q, role: cur.role, department: cur.dept,
+          source_scope: currentScope, file_type: currentFormat, limit: '8',
+        });
+        const res = await fetch(`/api/suggest?${params.toString()}`);
+        if (!res.ok) return;
+        suggestItems = await res.json();
+        suggestMode = 'results';
+        suggestActive = -1;
+        renderSuggest(q, false);
+      } catch (e) { /* suggestions are best-effort; grid search still runs */ }
+    }
+
+    function renderSuggest(q, isRecent) {
+      const panel = document.getElementById('suggest-panel');
+      if (!suggestItems.length) { hideSuggest(); return; }
+      const head = isRecent ? 'Recent searches' : `Top matches for \u201C${esc(q)}\u201D`;
+      panel.innerHTML = `<div class="suggest-head">${head}</div>` + suggestItems.map((s, i) => {
+        const ftype = (s.file_type || 'txt').toLowerCase();
+        const label = s.title || s.id || '';
+        return `<div class="suggest-item" data-i="${i}" onclick="pickSuggest(${i})">
+      <span class="badge-fmt bf-${ftype}">${ftype.toUpperCase()}</span>
+      <span class="sg-title">${isRecent ? esc(label) : hi(label, q)}</span>
+      ${s.id && !s.isRecent ? `<span class="sg-id">${esc(s.id)}</span>` : ''}
+    </div>`;
+      }).join('');
+      panel.classList.add('open');
+      document.getElementById('db-search').setAttribute('aria-expanded', 'true');
+      paintSuggestActive();
+    }
+
+    function pickSuggest(i) {
+      const s = suggestItems[i];
+      if (!s) return;
+      const inp = document.getElementById('db-search');
+      inp.value = s.title || s.id || '';
+      if (inp.value.trim()) saveRecent(inp.value.trim());
+      document.getElementById('search-clear').classList.toggle('show', inp.value.length > 0);
+      hideSuggest();
+      inp.focus();
+      loadRecords();
+    }
+
+    function showRecentPanel() {
+      const recent = getRecent();
+      if (!recent.length) { hideSuggest(); return; }
+      suggestItems = recent.map(q => ({ title: q, id: '', file_type: 'txt', isRecent: true }));
+      suggestMode = 'recent';
+      suggestActive = -1;
+      renderSuggest('', true);
+    }
+
+    function getRecent() {
+      try { return JSON.parse(localStorage.getItem('corpai-recent-' + cur.role) || '[]'); }
+      catch (e) { return []; }
+    }
+
+    function saveRecent(q) {
+      if (!q || q.length < 2) return;
+      const k = 'corpai-recent-' + cur.role;
+      const arr = getRecent().filter(x => x !== q);
+      arr.unshift(q);
+      try { localStorage.setItem(k, JSON.stringify(arr.slice(0, 5))); } catch (e) { }
+    }
+
+    function hideSuggest() {
+      document.getElementById('suggest-panel').classList.remove('open');
+      document.getElementById('db-search').setAttribute('aria-expanded', 'false');
+      suggestActive = -1;
+    }
+
+    function paintSuggestActive() {
+      document.querySelectorAll('#suggest-panel .suggest-item').forEach((el, i) => {
+        el.classList.toggle('active', i === suggestActive);
+      });
+    }
+
+    /* Highlights the first case-insensitive match; escapes everything else. */
+    function hi(text, q) {
+      const t = String(text || '');
+      const needle = String(q || '').trim();
+      if (needle.length < 2) return esc(t);
+      const li = t.toLowerCase().indexOf(needle.toLowerCase());
+      if (li === -1) return esc(t);
+      return esc(t.slice(0, li)) + '<mark>' + esc(t.slice(li, li + needle.length)) + '</mark>' + esc(t.slice(li + needle.length));
+    }
+
+    function clearSearchKeyword() {
+      const inp = document.getElementById('db-search');
+      inp.value = '';
+      document.getElementById('search-clear').classList.remove('show');
+      hideSuggest();
+      loadRecords();
+      inp.focus();
+    }
+
+    /* Active-filter chips with one-tap remove. */
+    function renderChips(kw, dept, cl) {
+      const row = document.getElementById('chips-row');
+      const chips = [];
+      if ((kw || '').trim()) chips.push({ kind: 'kw', label: `\uD83D\uDD0D \u201C${kw.trim()}\u201D` });
+      if (currentScope !== 'all') chips.push({ kind: 'scope', label: `Scope: ${currentScope}` });
+      if (currentFormat !== 'all') chips.push({ kind: 'format', label: `Format: ${currentFormat.toUpperCase()}` });
+      if (dept !== 'All') chips.push({ kind: 'dept', label: `Dept: ${dept}` });
+      if (cl !== 'All') chips.push({ kind: 'cl', label: `Clearance: ${cl}` });
+      if (!chips.length) { row.classList.remove('show'); row.innerHTML = ''; return; }
+      row.innerHTML = chips.map(c => `<span class="chip">${esc(c.label)}<button title="Remove filter" onclick="clearChip('${c.kind}')">\u2715</button></span>`).join('')
+        + (chips.length > 1 ? `<button class="chip-clear" onclick="clearSearchFilters()">Clear all</button>` : '');
+      row.classList.add('show');
+    }
+
+    function clearChip(kind) {
+      if (kind === 'kw') {
+        document.getElementById('db-search').value = '';
+        document.getElementById('search-clear').classList.remove('show');
+      }
+      else if (kind === 'scope') { setDbScope('all'); return; }
+      else if (kind === 'format') { setDbFormat('all'); return; }
+      else if (kind === 'dept') document.getElementById('db-dept').value = 'All';
+      else if (kind === 'cl') document.getElementById('db-cl').value = 'All';
+      loadRecords();
+    }
+
+    function clearSearchFilters() {
+      document.getElementById('db-search').value = '';
+      document.getElementById('search-clear').classList.remove('show');
+      document.getElementById('db-dept').value = 'All';
+      document.getElementById('db-cl').value = 'All';
+      currentScope = 'all';
+      document.querySelectorAll('.scope-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-scope') === 'all'));
+      currentFormat = 'all';
+      document.querySelectorAll('.fmt-tab').forEach(b => b.classList.toggle('active', b.getAttribute('data-fmt') === 'all'));
+      hideSuggest();
+      loadRecords();
+    }
+
+    /* ── COMMAND PALETTE (Cmd/Ctrl+K): actions + RBAC-aware record jump ── */
+    function palActionList() {
+      return [
+        { kind: 'Go to', label: 'Copilot Assistant', run: () => showView('assistant') },
+        { kind: 'Go to', label: 'Data Management', run: () => showView('database') },
+        { kind: 'Role', label: 'Switch to Admin (Aditya Rao)', run: () => setUser('admin') },
+        { kind: 'Role', label: 'Switch to Manager (Rohan Verma)', run: () => setUser('manager') },
+        { kind: 'Role', label: 'Switch to Analyst (Ananya Iyer)', run: () => setUser('analyst') },
+        { kind: 'Role', label: 'Switch to Employee (Aarav Sharma)', run: () => setUser('employee') },
+        { kind: 'Scope', label: 'Search scope: All Data', run: () => { showView('database'); setDbScope('all'); } },
+        { kind: 'Scope', label: 'Search scope: Synthetic Only', run: () => { showView('database'); setDbScope('synthetic'); } },
+        { kind: 'Scope', label: 'Search scope: Non-Synthetic Vault', run: () => { showView('database'); setDbScope('vault'); } },
+        { kind: 'Format', label: 'Format filter: All', run: () => setDbFormat('all') },
+        { kind: 'Format', label: 'Format filter: PDF', run: () => setDbFormat('pdf') },
+        { kind: 'Format', label: 'Format filter: Markdown', run: () => setDbFormat('md') },
+        { kind: 'Format', label: 'Format filter: CSV', run: () => setDbFormat('csv') },
+        { kind: 'Format', label: 'Format filter: Text', run: () => setDbFormat('txt') },
+        { kind: 'Format', label: 'Format filter: JSON', run: () => setDbFormat('json') },
+      ];
+    }
+
+    function openPalette() {
+      document.getElementById('pal-overlay').classList.add('open');
+      const inp = document.getElementById('pal-input');
+      inp.value = '';
+      palActive = 0;
+      renderPalette(palActionList(), []);
+      setTimeout(() => inp.focus(), 30);
+    }
+
+    function closePalette() {
+      document.getElementById('pal-overlay').classList.remove('open');
+    }
+
+    function onPaletteInput() {
+      const q = document.getElementById('pal-input').value.trim().toLowerCase();
+      const actions = palActionList().filter(a => !q || a.label.toLowerCase().includes(q));
+      clearTimeout(palTimer);
+      if (q.length >= 2) palTimer = setTimeout(() => paletteRecordSearch(q, actions), 180);
+      else renderPalette(actions, []);
+    }
+
+    async function paletteRecordSearch(q, actions) {
+      try {
+        const params = new URLSearchParams({
+          q, role: cur.role, department: cur.dept,
+          source_scope: 'all', file_type: 'all', limit: '6',
+        });
+        const res = await fetch(`/api/suggest?${params.toString()}`);
+        const recs = res.ok ? await res.json() : [];
+        if (document.getElementById('pal-input').value.trim().toLowerCase() !== q) return;
+        renderPalette(actions, recs);
+      } catch (e) { renderPalette(actions, []); }
+    }
+
+    function renderPalette(actions, recs) {
+      palItems = [
+        ...actions.map(a => ({ ...a, type: 'action' })),
+        ...recs.map(r => ({ type: 'record', kind: (r.file_type || 'txt').toUpperCase(), label: r.title || r.id, hint: r.id, id: r.id })),
+      ];
+      palActive = 0;
+      paintPalette();
+    }
+
+    function paintPalette() {
+      const list = document.getElementById('pal-list');
+      if (!palItems.length) {
+        list.innerHTML = '<div class="tbl-msg">No matching commands or records.</div>';
+        return;
+      }
+      list.innerHTML = palItems.map((it, i) => `
+    <div class="pal-item${i === palActive ? ' active' : ''}" data-i="${i}" onclick="runPalette(${i})">
+      <span class="pal-kind">${esc(it.kind || it.type)}</span>
+      <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.label)}</span>
+      ${it.hint ? `<span class="pal-hint">${esc(it.hint)}</span>` : ''}
+    </div>`).join('');
+      list.querySelector('.pal-item.active')?.scrollIntoView({ block: 'nearest' });
+    }
+
+    function runPalette(i) {
+      const it = palItems[i];
+      if (!it) return;
+      closePalette();
+      if (it.type === 'action') it.run();
+      else {
+        showView('database');
+        document.getElementById('db-search').value = '';
+        loadRecords().then(() => showDetail(it.id));
+      }
+    }
+
+    function onPaletteKeydown(e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!palItems.length) return;
+        palActive = (palActive + (e.key === 'ArrowDown' ? 1 : -1) + palItems.length) % palItems.length;
+        paintPalette();
+      } else if (e.key === 'Enter') {
+        runPalette(palActive);
+      } else if (e.key === 'Escape') {
+        closePalette();
+      }
+    }
+
+    /* ── RECORDS QUERYING ── */
+    async function loadRecords() {
+      const kw = document.getElementById('db-search').value;
+      const dept = document.getElementById('db-dept').value;
+      const cl = document.getElementById('db-cl').value;
+
+      const tb = document.getElementById('rtbody');
+      const grid = document.getElementById('view-mode-grid');
+
+      tb.innerHTML = '<tr><td colspan="7" class="tbl-msg">Loading records...</td></tr>';
+      grid.innerHTML = '<div class="tbl-msg" style="grid-column:1/-1">Loading records...</div>';
+      selectedRowId = null;
+      closeDetail();
+
+      try {
+        const params = new URLSearchParams({
+          role: cur.role,
+          department: cur.dept,
+          source_scope: currentScope,
+          file_type: currentFormat,
+          keyword: kw,
+          dept_filter: dept,
+          clearance_filter: cl,
+          limit: '150',
+        });
+
+        const res = await fetch(`/api/records?${params.toString()}`);
+        if (res.status === 403) {
+          tb.innerHTML = '<tr><td colspan="7" class="tbl-msg err">Access restricted for this role.</td></tr>';
+          return;
+        }
+        const recs = await res.json();
+        renderChips(kw, dept, cl);
+        const qEcho = kw.trim() ? ` for \u201C${kw.trim()}\u201D` : '';
+        document.getElementById('db-count').textContent = `Showing ${recs.length} record${recs.length !== 1 ? 's' : ''}${qEcho}`;
+
+        if (!recs.length) {
+          const emptyHtml = `<div class="empty-box">
+        <div class="e-title">No documents match${kw.trim() ? ` \u201C${esc(kw.trim())}\u201D` : ''}</div>
+        <div class="e-sub">Nothing in your clearance level matches the current query and filters. Your search and filters are kept above - try a shorter keyword or clear everything to browse the full set.</div>
+        <button class="btn-cta" onclick="clearSearchFilters()">Clear search &amp; filters</button>
+      </div>`;
+          tb.innerHTML = `<tr><td colspan="7">${emptyHtml}</td></tr>`;
+          grid.innerHTML = `<div style="grid-column:1/-1"><div class="tbl-wrap">${emptyHtml}</div></div>`;
+          return;
+        }
+
+        // Render Table View
+        tb.innerHTML = recs.map(r => {
+          const rid = esc(r.id || '?');
+          const cl = esc(r.clearance_level || 'Internal');
+          const ftype = (r.file_type || 'txt').toLowerCase();
+          const isSynth = r.is_synthetic;
+
+          const actions = cur.canEdit && isSynth ? `
+        <td class="tbl-act">
+          <button class="btn-row edit" onclick="event.stopPropagation();openEdit('${rid}')">Edit</button>
+          <button class="btn-row del" onclick="event.stopPropagation();openDeleteConfirm('${rid}','${esc(r.title || r.id)}')">Delete</button>
+        </td>` : `
+        <td class="tbl-act">
+          <button class="btn-row" onclick="event.stopPropagation();showDetail('${rid}')">Inspect</button>
+        </td>`;
+
+          return `
+        <tr class="clickable" id="tr-${rid}" onclick="showDetail('${rid}')">
+          <td><span class="rid">${rid}</span></td>
+          <td><span class="badge-src ${isSynth ? 'bs-synth' : 'bs-vault'}">${isSynth ? 'Synthetic' : 'Vault'}</span></td>
+          <td><span class="badge-fmt bf-${ftype}">${ftype.toUpperCase()}</span></td>
+          <td><span class="rtitle" title="${esc(r.title || '')}">${hi(r.title || 'Enterprise Document', kw)}</span></td>
+          <td><span class="rdept">${esc(r.department || '?')}</span></td>
+          <td><span class="badge-cl bcl-${cl}">${cl}</span></td>
+          ${actions}
+        </tr>`;
+        }).join('');
+
+        // Render Card Grid View
+        grid.innerHTML = recs.map(r => {
+          const rid = esc(r.id || '?');
+          const ftype = (r.file_type || 'txt').toLowerCase();
+          const isSynth = r.is_synthetic;
+          const cl = esc(r.clearance_level || 'Internal');
+          const flagged = r.compliance_label === 1;
+
+          return `
+        <div class="doc-card" id="card-doc-${rid}" onclick="showDetail('${rid}')">
+          <div class="dc-top">
+            <span class="badge-fmt bf-${ftype}">${ftype.toUpperCase()}</span>
+            <span class="badge-src ${isSynth ? 'bs-synth' : 'bs-vault'}">${isSynth ? 'Synthetic' : 'Original Vault'}</span>
+          </div>
+          <div class="dc-title">${hi(r.title || 'Enterprise Record', kw)}</div>
+          <div class="dc-snippet">${hi(r.snippet || 'No preview available.', kw)}</div>
+          <div class="dc-meta">
+            <span>${esc(r.department || 'Operations')}</span>
+            <span class="badge-cl bcl-${cl}">${cl}</span>
+          </div>
+        </div>`;
+        }).join('');
+
+      } catch (e) {
+        tb.innerHTML = `<tr><td colspan="7" class="tbl-msg err">Error querying records: ${esc(e.message)}</td></tr>`;
+      }
+    }
+
+    /* ── DETAIL DRAWER (FORMAT-AWARE) ── */
+    async function showDetail(rid) {
+      if (selectedRowId) {
+        document.getElementById('tr-' + selectedRowId)?.classList.remove('row-selected');
+        document.getElementById('card-doc-' + selectedRowId)?.classList.remove('selected');
+      }
+      selectedRowId = rid;
+      document.getElementById('tr-' + rid)?.classList.add('row-selected');
+      document.getElementById('card-doc-' + rid)?.classList.add('selected');
+
+      const panel = document.getElementById('db-right');
+      panel.classList.remove('closed');
+
+      const body = document.getElementById('dp-body');
+      body.innerHTML = '<div class="tbl-msg">Loading document details...</div>';
+
+      try {
+        const res = await fetch(`/api/records/${encodeURIComponent(rid)}?role=${encodeURIComponent(cur.role)}&department=${encodeURIComponent(cur.dept)}`);
+        if (!res.ok) throw new Error('Document record not found');
+        const r = await res.json();
+        cachedActiveDoc = r;
+
+        document.getElementById('dp-title').textContent = r.title || 'Document Inspection';
+        const ftype = (r.file_type || 'txt').toLowerCase();
+        const isSynth = r.is_synthetic;
+        const flagged = r.compliance_label === 1 || r.compliance_label === '1';
+
+        let viewerHtml = '';
+        const pv = r.parsed_view || {};
+
+        if (ftype === 'pdf') {
+          viewerHtml = `
+        <div class="viewer-box">
+          <div class="viewer-toolbar">
+            <span class="viewer-title">📄 PDF Document Viewer</span>
+            <span style="font-size:10px;color:var(--t3)">Page ${pv.page_number || 1} of ${pv.total_pages || 1}</span>
+          </div>
+          <div class="viewer-canvas">
+            <div class="pdf-page-sheet">
+              <div class="pdf-page-hdr">
+                <span>${esc(pv.document_title || r.title)}</span>
+                <span>PAGE ${pv.page_number || 1}</span>
+              </div>
+              <div style="white-space:pre-wrap">${esc(r.content || '')}</div>
+            </div>
+          </div>
+        </div>`;
+        } else if (ftype === 'csv' && pv.type === 'csv_table') {
+          const headersHtml = (pv.headers || []).map(h => `<th>${esc(h)}</th>`).join('');
+          const rowsHtml = (pv.rows || []).slice(0, 25).map(row => `<tr>${row.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+          viewerHtml = `
+        <div class="viewer-box">
+          <div class="viewer-toolbar">
+            <span class="viewer-title">📊 Spreadsheets Table Grid</span>
+            <div class="viewer-btn-group">
+              <button class="viewer-tab-btn active" id="btn-vt-grid" onclick="toggleViewerTab('grid')">Table</button>
+              <button class="viewer-tab-btn" id="btn-vt-raw" onclick="toggleViewerTab('raw')">Raw CSV</button>
+            </div>
+          </div>
+          <div class="viewer-canvas" id="vt-canvas-grid" style="padding:0">
+            <table class="csv-grid-tbl">
+              <thead><tr>${headersHtml}</tr></thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+          <div class="viewer-canvas hidden" id="vt-canvas-raw" style="font-family:var(--mono);font-size:11px;white-space:pre">
+            ${esc(r.content || '')}
+          </div>
+        </div>`;
+        } else if (ftype === 'md') {
+          viewerHtml = `
+        <div class="viewer-box">
+          <div class="viewer-toolbar">
+            <span class="viewer-title">📝 Markdown Document</span>
+            <div class="viewer-btn-group">
+              <button class="viewer-tab-btn active" id="btn-vt-render" onclick="toggleViewerTab('render')">Rendered</button>
+              <button class="viewer-tab-btn" id="btn-vt-raw" onclick="toggleViewerTab('raw')">Raw</button>
+            </div>
+          </div>
+          <div class="viewer-canvas md-render" id="vt-canvas-render">
+            ${fmt(r.content || '')}
+          </div>
+          <div class="viewer-canvas hidden" id="vt-canvas-raw" style="font-family:var(--mono);font-size:11px;white-space:pre-wrap">
+            ${esc(r.content || '')}
+          </div>
+        </div>`;
+        } else {
+          // Plain text or email
+          viewerHtml = `
+        <div class="viewer-box">
+          <div class="viewer-toolbar">
+            <span class="viewer-title">📃 Document Text Reader</span>
+            <span style="font-size:10px;color:var(--t3)">${(r.content || '').length} characters</span>
+          </div>
+          <div class="viewer-canvas" style="font-family:var(--mono);font-size:11.5px;white-space:pre-wrap">
+            ${esc(r.content || 'No content.')}
+          </div>
+        </div>`;
+        }
+
+        body.innerHTML = `
+      <div class="dp-field"><div class="dp-lbl">Document Title</div><div class="dp-val" style="font-weight:600">${esc(r.title || '?')}</div></div>
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+        <span class="badge-src ${isSynth ? 'bs-synth' : 'bs-vault'}">${isSynth ? 'Synthetic Process' : 'Original Vault'}</span>
+        <span class="badge-fmt bf-${ftype}">${ftype.toUpperCase()} Format</span>
+        <span class="badge-cl bcl-${esc(r.clearance_level || 'Internal')}">${esc(r.clearance_level || 'Internal')}</span>
+        <span class="${flagged ? 'badge-flagged' : 'badge-clean'}">${flagged ? '⚠️ Audit Flag' : 'Clean'}</span>
+      </div>
+      <div class="dp-field"><div class="dp-lbl">Record ID</div><div class="dp-val mono">${esc(r.id || '?')}</div></div>
+      <div class="dp-field"><div class="dp-lbl">Department Scope</div><div class="dp-val">${esc(r.department || '?')}</div></div>
+      <div class="dp-field"><div class="dp-lbl">Author / Source</div><div class="dp-val mono">${esc(r.author || r.source_file || 'system')}</div></div>
+      ${r.recipient ? `<div class="dp-field"><div class="dp-lbl">Recipient / Audience</div><div class="dp-val mono">${esc(r.recipient)}</div></div>` : ''}
+      <div class="dp-field"><div class="dp-lbl">Timestamp / Ingested</div><div class="dp-val mono">${esc(String(r.created_at || '').split('T')[0])}</div></div>
+      
+      ${viewerHtml}
     `;
 
-    const foot=document.getElementById('dp-foot');
-    foot.innerHTML='';
-    if(cur.canEdit) {
-      const eb=document.createElement('button');
-      eb.className='btn-ok'; eb.textContent='Edit record';
-      eb.onclick=()=>openEdit(r.id);
-      const db2=document.createElement('button');
-      db2.className='btn-danger'; db2.textContent='Delete';
-      db2.onclick=()=>openDeleteConfirm(r.id, r.title||r.id);
-      foot.appendChild(eb); foot.appendChild(db2);
+        const foot = document.getElementById('dp-foot');
+        foot.innerHTML = `
+      <button class="btn-ghost" onclick="openFullscreenInspect()">Full Screen</button>
+    `;
+        if (cur.canEdit && isSynth) {
+          foot.innerHTML += `
+        <button class="btn-ok" onclick="openEdit('${r.id}')">Edit</button>
+        <button class="btn-danger" onclick="openDeleteConfirm('${r.id}','${esc(r.title || r.id)}')">Delete</button>
+      `;
+        }
+      } catch (e) {
+        body.innerHTML = `<div class="tbl-msg err">Error: ${esc(e.message)}</div>`;
+      }
     }
-  } catch(e) {
-    body.innerHTML=`<div class="tbl-msg err">Error: ${esc(e.message)}</div>`;
-  }
-}
 
-function closeDetail() {
-  document.getElementById('db-right').classList.add('closed');
-  if(selectedRowId) {
-    const prev=document.getElementById('tr-'+selectedRowId);
-    if(prev) prev.classList.remove('row-selected');
-  }
-  selectedRowId=null;
-}
-
-/* ── EDIT ── */
-async function openEdit(rid) {
-  if(!cur.canEdit) return;
-  try {
-    const res=await fetch(`/api/records/${encodeURIComponent(rid)}?role=${encodeURIComponent(cur.role)}`);
-    const r=await res.json();
-    document.getElementById('edit-id').value=r.id;
-    document.getElementById('edit-title').value=r.title||'';
-    document.getElementById('edit-content').value=r.content||'';
-    document.getElementById('edit-dept').value=r.department||'Operations';
-    document.getElementById('edit-cl').value=r.clearance_level||'Internal';
-    document.getElementById('edit-flag').value=String(r.compliance_label||0);
-    document.getElementById('edit-st').textContent='';
-    document.getElementById('btn-save-edit').disabled=false;
-    openModal('m-edit');
-  } catch(e) { alert('Could not load record: '+e.message); }
-}
-
-async function submitEdit() {
-  const rid=document.getElementById('edit-id').value;
-  const btn=document.getElementById('btn-save-edit');
-  const st=document.getElementById('edit-st');
-  btn.disabled=true; st.style.color='var(--t2)'; st.textContent='Saving...';
-  try {
-    const payload={
-      role:cur.role,
-      title:document.getElementById('edit-title').value,
-      content:document.getElementById('edit-content').value,
-      department:document.getElementById('edit-dept').value,
-      clearance_level:document.getElementById('edit-cl').value,
-      compliance_label:parseInt(document.getElementById('edit-flag').value),
-    };
-    const res=await fetch(`/api/records/${encodeURIComponent(rid)}`,{
-      method:'PATCH',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)});
-    const d=await res.json();
-    if(res.ok) {
-      st.style.color='var(--green)'; st.textContent='Saved successfully.';
-      setTimeout(()=>{closeModal('m-edit'); loadRecords(); if(selectedRowId===rid) showDetail(rid);},800);
-    } else {
-      st.style.color='var(--red)'; st.textContent=d.detail||'Save failed.';
+    function closeDetail() {
+      document.getElementById('db-right').classList.add('closed');
+      if (selectedRowId) {
+        document.getElementById('tr-' + selectedRowId)?.classList.remove('row-selected');
+        document.getElementById('card-doc-' + selectedRowId)?.classList.remove('selected');
+      }
+      selectedRowId = null;
+      cachedActiveDoc = null;
     }
-  } catch(e) { st.style.color='var(--red)'; st.textContent='Error: '+e.message; }
-  btn.disabled=false;
-}
 
-/* ── DELETE ── */
-function openDeleteConfirm(rid, label) {
-  pendingDeleteId=rid;
-  document.getElementById('del-label').textContent=label;
-  openModal('m-delete');
-}
-
-async function submitDelete() {
-  if(!pendingDeleteId) return;
-  try {
-    const res=await fetch(`/api/records/${encodeURIComponent(pendingDeleteId)}?role=${encodeURIComponent(cur.role)}`,
-      {method:'DELETE'});
-    if(res.ok){
-      closeModal('m-delete');
-      if(selectedRowId===pendingDeleteId) closeDetail();
-      pendingDeleteId=null;
-      loadRecords();
-    } else {
-      const d=await res.json();
-      alert(d.detail||'Delete failed.');
+    function toggleViewerTab(tab) {
+      if (tab === 'grid') {
+        document.getElementById('btn-vt-grid')?.classList.add('active');
+        document.getElementById('btn-vt-raw')?.classList.remove('active');
+        document.getElementById('vt-canvas-grid')?.classList.remove('hidden');
+        document.getElementById('vt-canvas-raw')?.classList.add('hidden');
+      } else if (tab === 'render') {
+        document.getElementById('btn-vt-render')?.classList.add('active');
+        document.getElementById('btn-vt-raw')?.classList.remove('active');
+        document.getElementById('vt-canvas-render')?.classList.remove('hidden');
+        document.getElementById('vt-canvas-raw')?.classList.add('hidden');
+      } else if (tab === 'raw') {
+        document.getElementById('btn-vt-raw')?.classList.add('active');
+        document.getElementById('btn-vt-grid')?.classList.remove('active');
+        document.getElementById('btn-vt-render')?.classList.remove('active');
+        document.getElementById('vt-canvas-grid')?.classList.add('hidden');
+        document.getElementById('vt-canvas-render')?.classList.add('hidden');
+        document.getElementById('vt-canvas-raw')?.classList.remove('hidden');
+      }
     }
-  } catch(e) { alert('Error: '+e.message); }
-}
 
-/* ── UPLOAD ── */
-async function handleUpload(e) {
-  e.preventDefault();
-  const fi=document.getElementById('upload-file');
-  if(!fi.files?.length) return;
-  const file=fi.files[0];
-  const dept=document.getElementById('upload-dept').value;
-  const cl=document.getElementById('upload-cl').value;
-  const st=document.getElementById('up-st');
-  const btn=document.getElementById('btn-up');
-  const fd=new FormData();
-  fd.append('file',file);fd.append('department',dept);
-  fd.append('clearance_level',cl);fd.append('role',cur.role);
-  btn.disabled=true; st.style.color='var(--t2)'; st.textContent=`Uploading '${file.name}'...`;
-  try {
-    const res=await fetch('/api/upload',{method:'POST',body:fd});
-    const d=await res.json();
-    if(res.ok){
-      st.style.color='var(--green)'; st.textContent='Ingested. Rebuilding search index...';
-      setTimeout(()=>{closeModal('m-upload');fi.value='';st.textContent='';loadRecords()},1400);
-    } else { st.style.color='var(--red)'; st.textContent=d.detail||'Upload failed.'; }
-  } catch(err){ st.style.color='var(--red)'; st.textContent='Error: '+err.message; }
-  btn.disabled=false;
-}
+    /* ── FULL SCREEN DOCUMENT INSPECTION MODAL ── */
+    function openFullscreenInspect() {
+      if (!cachedActiveDoc) return;
+      const r = cachedActiveDoc;
+      const ftype = (r.file_type || 'txt').toLowerCase();
+      const isSynth = r.is_synthetic;
 
-/* ── MODALS / UTIL ── */
-function openModal(id){document.getElementById(id).classList.add('open')}
-function closeModal(id){document.getElementById(id).classList.remove('open')}
-document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
-</script>
+      document.getElementById('mi-fmt').textContent = ftype.toUpperCase();
+      document.getElementById('mi-fmt').className = `badge-fmt bf-${ftype}`;
+      document.getElementById('mi-src').textContent = isSynth ? 'Synthetic' : 'Original Vault';
+      document.getElementById('mi-src').className = `badge-src ${isSynth ? 'bs-synth' : 'bs-vault'}`;
+      document.getElementById('mi-title').textContent = r.title || 'Document Inspection';
+
+      const body = document.getElementById('mi-body');
+      const pv = r.parsed_view || {};
+
+      if (ftype === 'pdf') {
+        body.innerHTML = `
+      <div style="margin-bottom:12px;font-size:12px;color:var(--t2)">
+        Document: <strong>${esc(pv.document_title || r.title)}</strong> · Page ${pv.page_number || 1} of ${pv.total_pages || 1} · Department: <strong>${esc(r.department)}</strong> · Clearance: <strong>${esc(r.clearance_level)}</strong>
+      </div>
+      <div class="pdf-page-sheet" style="min-height:360px">
+        <div class="pdf-page-hdr">
+          <span>${esc(pv.document_title || r.title)}</span>
+          <span>PAGE ${pv.page_number || 1}</span>
+        </div>
+        <div style="white-space:pre-wrap;font-size:13px">${esc(r.content || '')}</div>
+      </div>`;
+      } else if (ftype === 'csv' && pv.type === 'csv_table') {
+        const headersHtml = (pv.headers || []).map(h => `<th>${esc(h)}</th>`).join('');
+        const rowsHtml = (pv.rows || []).map(row => `<tr>${row.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+        body.innerHTML = `
+      <div style="margin-bottom:10px;font-size:12px;color:var(--t2)">
+        Spreadsheet Dataset · Total Rows: <strong>${pv.total_rows || pv.rows.length}</strong> · Department: <strong>${esc(r.department)}</strong>
+      </div>
+      <div style="overflow:auto;max-height:450px;border:1px solid var(--rule);border-radius:var(--rs)">
+        <table class="csv-grid-tbl">
+          <thead><tr>${headersHtml}</tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>`;
+      } else if (ftype === 'md') {
+        body.innerHTML = `
+      <div class="md-render" style="padding:10px;line-height:1.7;font-size:13.5px">
+        ${fmt(r.content || '')}
+      </div>`;
+      } else {
+        body.innerHTML = `
+      <div style="font-family:var(--mono);font-size:12px;line-height:1.6;white-space:pre-wrap;padding:12px;background:var(--bg);border-radius:var(--rs)">
+        ${esc(r.content || '')}
+      </div>`;
+      }
+
+      openModal('m-inspect');
+    }
+
+    function copyDocumentText() {
+      if (cachedActiveDoc && cachedActiveDoc.content) {
+        navigator.clipboard.writeText(cachedActiveDoc.content);
+        alert('Document content copied to clipboard.');
+      }
+    }
+
+    /* ── CHAT COPILOT ── */
+    function resetChat() {
+      const col = document.getElementById('chat-col');
+      col.innerHTML = '';
+      const w = document.createElement('div');
+      w.className = 'welcome';
+      w.innerHTML = `
+    <div class="w-greeting">${esc(cur.greeting)} <em>${esc(cur.greetingName)}</em></div>
+    <div class="w-desc">${esc(cur.desc)}</div>
+    <div class="sugg-label">Try</div>
+    <div class="sugg-list">${(cur.sugg || []).map(s => `<div class="sugg-item" onclick="sendSugg(this)">${esc(s)}</div>`).join('')}</div>`;
+      col.appendChild(w);
+    }
+
+    function sendSugg(el) {
+      document.getElementById('chat-input').value = el.textContent.trim();
+      sendChat();
+    }
+
+    async function sendChat() {
+      if (busy) return;
+      const inp = document.getElementById('chat-input');
+      const q = inp.value.trim();
+      if (!q) return;
+
+      const scope = cur.role === 'Admin' ? 'all' : 'synthetic';
+
+      inp.value = '';
+      busy = true;
+      document.getElementById('btn-send').disabled = true;
+      document.getElementById('chat-status-indicator').textContent = 'Searching knowledge vault & generating...';
+      document.querySelector('.welcome')?.remove();
+
+      const col = document.getElementById('chat-col');
+      const um = document.createElement('div');
+      um.className = 'msg user';
+      um.innerHTML = `<div class="bbl">${esc(q)}</div>`;
+      col.appendChild(um);
+      scrollBot();
+
+      const ld = document.createElement('div');
+      ld.className = 'msg assistant';
+      ld.innerHTML = `<div class="bbl"><div class="msg-label">Retrieving records (${scope.toUpperCase()})</div><div class="msg-body"><div class="tdots"><span></span><span></span><span></span></div></div></div>`;
+      col.appendChild(ld);
+      scrollBot();
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: q,
+            role: cur.role,
+            department: cur.dept,
+          })
+        });
+        const d = await res.json();
+        ld.remove();
+
+        let srcHtml = '';
+        if (d.sources && d.sources.length) {
+          srcHtml = `
+        <div class="sources-box">
+          <div class="sources-title">📎 Cited Knowledge Sources (${d.sources.length}):</div>
+          <div class="sources">
+            ${d.sources.map(s => {
+            const sf = (s.file_type || 'txt').toLowerCase();
+            const isS = s.is_synthetic;
+            return `
+                <div class="src-chip" onclick="inspectCitation('${esc(s.id)}')">
+                  <span class="pill-fmt ${sf}">${sf.toUpperCase()}</span>
+                  <span class="pill-src ${isS ? 'synth' : 'vault'}">${isS ? 'Synth' : 'Vault'}</span>
+                  <span>${esc(s.title ? s.title.slice(0, 28) : s.id)}</span>
+                </div>`;
+          }).join('')}
+          </div>
+        </div>`;
+        }
+
+        const am = document.createElement('div');
+        am.className = 'msg assistant';
+        am.innerHTML = `<div class="bbl"><div class="msg-label">Corporate Intelligence Copilot</div><div class="msg-body">${fmt(d.answer || 'No response generated.')}</div>${srcHtml}</div>`;
+        col.appendChild(am);
+
+      } catch (e) {
+        ld.remove();
+        const em = document.createElement('div');
+        em.className = 'msg assistant';
+        em.innerHTML = `<div class="bbl"><div class="msg-label err-lbl">Copilot Note</div><div class="msg-body" style="color:var(--red)">${esc(e.message)}</div></div>`;
+        col.appendChild(em);
+      }
+
+      busy = false;
+      document.getElementById('btn-send').disabled = false;
+      document.getElementById('chat-status-indicator').textContent = 'Ready';
+      scrollBot();
+    }
+
+    async function inspectCitation(docId) {
+      try {
+        const res = await fetch(`/api/records/${encodeURIComponent(docId)}?role=${encodeURIComponent(cur.role)}&department=${encodeURIComponent(cur.dept)}`);
+        if (!res.ok) throw new Error('Citation document not found');
+        const r = await res.json();
+        cachedActiveDoc = r;
+        openFullscreenInspect();
+      } catch (e) {
+        alert(`Could not preview citation [${docId}]: ${e.message}`);
+      }
+    }
+
+    function scrollBot() {
+      const s = document.getElementById('chat-stream');
+      s.scrollTop = s.scrollHeight;
+    }
+
+    function fmt(text) {
+      let h = esc(text);
+      h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      h = h.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
+      h = h.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
+      h = h.replace(/((<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
+      h = h.split(/\n\n+/).map(p => p.trim() ? `<p>${p.replace(/\n/g, '<br>')}</p>` : '').join('');
+      return h || `<p>${esc(text)}</p>`;
+    }
+
+    /* ── EDIT RECORD ── */
+    async function openEdit(rid) {
+      if (!cur.canEdit) return;
+      try {
+        const res = await fetch(`/api/records/${encodeURIComponent(rid)}?role=${encodeURIComponent(cur.role)}`);
+        const r = await res.json();
+        document.getElementById('edit-id').value = r.id;
+        document.getElementById('edit-title').value = r.title || '';
+        document.getElementById('edit-content').value = r.content || '';
+        document.getElementById('edit-dept').value = r.department || 'Corporate Operations';
+        document.getElementById('edit-cl').value = r.clearance_level || 'Internal';
+        document.getElementById('edit-flag').value = String(r.compliance_label || 0);
+        document.getElementById('edit-st').textContent = '';
+        document.getElementById('btn-save-edit').disabled = false;
+        openModal('m-edit');
+      } catch (e) {
+        alert('Could not load record: ' + e.message);
+      }
+    }
+
+    async function submitEdit() {
+      const rid = document.getElementById('edit-id').value;
+      const btn = document.getElementById('btn-save-edit');
+      const st = document.getElementById('edit-st');
+      btn.disabled = true;
+      st.style.color = 'var(--t2)';
+      st.textContent = 'Saving changes to database...';
+
+      try {
+        const payload = {
+          role: cur.role,
+          title: document.getElementById('edit-title').value,
+          content: document.getElementById('edit-content').value,
+          department: document.getElementById('edit-dept').value,
+          clearance_level: document.getElementById('edit-cl').value,
+          compliance_label: parseInt(document.getElementById('edit-flag').value),
+        };
+        const res = await fetch(`/api/records/${encodeURIComponent(rid)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const d = await res.json();
+        if (res.ok) {
+          st.style.color = 'var(--green)';
+          st.textContent = 'Saved successfully.';
+          setTimeout(() => {
+            closeModal('m-edit');
+            loadRecords();
+            if (selectedRowId === rid) showDetail(rid);
+          }, 700);
+        } else {
+          st.style.color = 'var(--red)';
+          st.textContent = d.detail || 'Save failed.';
+        }
+      } catch (e) {
+        st.style.color = 'var(--red)';
+        st.textContent = 'Error: ' + e.message;
+      }
+      btn.disabled = false;
+    }
+
+    /* ── DELETE RECORD ── */
+    function openDeleteConfirm(rid, label) {
+      pendingDeleteId = rid;
+      document.getElementById('del-label').textContent = label;
+      openModal('m-delete');
+    }
+
+    async function submitDelete() {
+      if (!pendingDeleteId) return;
+      try {
+        const res = await fetch(`/api/records/${encodeURIComponent(pendingDeleteId)}?role=${encodeURIComponent(cur.role)}`, {
+          method: 'DELETE',
+        });
+        if (res.ok) {
+          closeModal('m-delete');
+          if (selectedRowId === pendingDeleteId) closeDetail();
+          pendingDeleteId = null;
+          loadStats();
+          loadRecords();
+        } else {
+          const d = await res.json();
+          alert(d.detail || 'Delete failed.');
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    /* ── UPLOAD FILE ── */
+    async function handleUpload(e) {
+      e.preventDefault();
+      const fi = document.getElementById('upload-file');
+      if (!fi.files?.length) return;
+      const file = fi.files[0];
+      const dept = document.getElementById('upload-dept').value;
+      const cl = document.getElementById('upload-cl').value;
+      const fidelity = document.getElementById('upload-fidelity').value;
+      const st = document.getElementById('up-st');
+      const btn = document.getElementById('btn-up');
+
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('department', dept);
+      fd.append('clearance_level', cl);
+      fd.append('fidelity', fidelity);
+      fd.append('role', cur.role);
+
+      btn.disabled = true;
+      st.style.color = 'var(--t2)';
+      st.textContent = `Ingesting '${file.name}' into vault & re-indexing...`;
+
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const d = await res.json();
+        if (res.ok) {
+          st.style.color = 'var(--green)';
+          st.textContent = 'File ingested and vector index updated.';
+          setTimeout(() => {
+            closeModal('m-upload');
+            fi.value = '';
+            st.textContent = '';
+            loadStats();
+            loadRecords();
+          }, 1200);
+        } else {
+          st.style.color = 'var(--red)';
+          st.textContent = d.detail || 'Upload failed.';
+        }
+      } catch (err) {
+        st.style.color = 'var(--red)';
+        st.textContent = 'Error: ' + err.message;
+      }
+      btn.disabled = false;
+    }
+
+    /* ── MODALS / UTILS ── */
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => {
+      if (e.target === o) o.classList.remove('open');
+    }));
+    document.getElementById('pal-overlay').addEventListener('click', e => {
+      if (e.target.id === 'pal-overlay') closePalette();
+    });
+    document.addEventListener('click', e => {
+      if (!e.target.closest || !e.target.closest('.srch-wrap')) hideSuggest();
+    });
+    document.addEventListener('keydown', e => {
+      const tag = (e.target.tagName || '').toUpperCase();
+      const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        document.getElementById('pal-overlay').classList.contains('open') ? closePalette() : openPalette();
+      } else if (e.key === '/' && !typing && document.getElementById('view-database').classList.contains('active')) {
+        e.preventDefault();
+        document.getElementById('db-search').focus();
+      }
+    });
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+  </script>
 </body>
+
 </html>

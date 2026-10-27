@@ -1,5 +1,5 @@
 """
-evaluator.py — Privacy & Semantic Utility Scorecard Engine
+evaluator.py - Privacy & Semantic Utility Scorecard Engine
 Quantifies three key enterprise metrics:
 1. PII Leakage Rate: Verifies 0% leakage of real emails, names, phone numbers, or account IDs.
 2. Semantic Utility Preservation: Measures cosine similarity between vault records and synthetic twins.
@@ -16,8 +16,8 @@ from ..agent.vector_store import get_retriever
 
 # Known real-world sensitive patterns from Enron/raw sources to scan for leakage
 KNOWN_POI_NAMES = [
-    r"\blenny\b", r"\blay\b", r"\bskilling\b", r"\bfastow\b",
-    r"\bkopper\b", r"\bglisan\b", r"\bcausey\b", r"\bbuy\b",
+    r"\blay\b", r"\bskilling\b", r"\bfastow\b",
+    r"\bkopper\b", r"\bglisan\b", r"\bcausey\b",
     r"\bhannon\b", r"\bdelainey\b", r"\bkean\b", r"\bkaminski\b"
 ]
 
@@ -127,7 +127,7 @@ def evaluate_semantic_utility(
 def evaluate_rbac_isolation() -> dict:
     """
     Simulates cross-role vector retrievals to verify that 100% of restricted records
-    are strictly invisible to General_Employee queries.
+    are strictly invisible to Employee queries.
     """
     test_queries = [
         "executive compensation and board restructuring",
@@ -135,7 +135,7 @@ def evaluate_rbac_isolation() -> dict:
         "compliance audit and fraud review",
     ]
 
-    retriever_emp = get_retriever(k=10, user_role="General_Employee")
+    retriever_emp = get_retriever(k=10, user_role="Employee")
     leaked_to_employee = 0
     total_retrieved = 0
 

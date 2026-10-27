@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-main.py — Desktop Launcher for Corporate AI Assistant
+main.py - Desktop Launcher for Corporate AI Assistant
 Starts the local FastAPI service and renders the desktop interface
 using pywebview (native macOS WebKit window) with automatic browser fallback.
 """
@@ -16,6 +16,9 @@ import webbrowser
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
+
+from dotenv import load_dotenv
+load_dotenv()
 
 import uvicorn
 from src.app.server import app
@@ -39,7 +42,7 @@ def run_server():
 
 def main():
     print("=" * 65)
-    print("      CORPORATE AI — MODERN ENTERPRISE DESKTOP APP")
+    print("      CORPORATE AI - MODERN ENTERPRISE DESKTOP APP")
     print("=" * 65)
     print(f"Backend Service : http://{HOST}:{PORT}")
     print("Engine          : WebKit (macOS Native pywebview)")
@@ -73,7 +76,7 @@ def main():
 
         print("\nLaunching native macOS desktop window...")
         window = webview.create_window(
-            title="Corporate AI — Privacy-Preserving Enterprise Copilot",
+            title="Corporate AI - Privacy-Preserving Enterprise Copilot",
             url=url,
             width=1240,
             height=820,

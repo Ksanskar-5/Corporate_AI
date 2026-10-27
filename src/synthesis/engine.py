@@ -1,5 +1,5 @@
 """
-engine.py — Generalized Batch JSON LLM Synthesis Engine
+engine.py - Generalized Batch JSON LLM Synthesis Engine
 Synthesizes privacy-safe enterprise records across all 5 file types:
 1. Emails & Communications (.csv, .json, .eml)
 2. Support & IT Tickets (.csv, .json, .jsonl)
@@ -17,9 +17,10 @@ import json
 import random
 import urllib.request
 import urllib.error
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from .db import save_synthetic_batch, get_synthetic_stats, get_synthetic_records
 from ..ingestion.vault import get_connection as get_vault_conn
+from ..ingestion.extractor import NOISE_KEYS
 from ..ingestion.parsers import parse_csv, parse_json, parse_pdf, parse_text
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
@@ -36,6 +37,51 @@ ENTERPRISE_DEPARTMENTS = [
     "Customer Support & Success",
 ]
 
+# User-facing synthesis detail levels, chosen at input time.
+# "full" keeps every fact, "balanced" keeps key facts, "minimal" keeps a short
+# summary and generalizes department, date, and risk flags for maximum privacy.
+FIDELITY_LEVELS = {
+    "full": {
+        "label": "Full detail",
+        "description": "Keeps the complete source text, all business attributes, and the source department, date context, and risk flags.",
+        "max_words": None,
+        "max_attrs": None,
+        "keep_department": True,
+        "realistic_timestamp": True,
+        "keep_flags": True,
+    },
+    "balanced": {
+        "label": "Balanced",
+        "description": "Keeps key facts (up to ~120 words plus 10 attributes) with the source department and risk flags.",
+        "max_words": 120,
+        "max_attrs": 10,
+        "keep_department": True,
+        "realistic_timestamp": True,
+        "keep_flags": True,
+    },
+    "minimal": {
+        "label": "Minimal detail",
+        "description": "Keeps a short summary (~40 words, 3 attributes) and generalizes department, date, and risk flags for maximum privacy.",
+        "max_words": 40,
+        "max_attrs": 3,
+        "keep_department": False,
+        "realistic_timestamp": False,
+        "keep_flags": False,
+    },
+}
+
+# Attribute keys surfaced first: identifiers carry the most retrievable meaning.
+_ID_ATTR_HINTS = ("id", "ticket", "serial", "lot", "code", "kb", "resolution", "status")
+
+
+def _normalize_fidelity(fidelity: str) -> str:
+    """Validates a user-chosen detail level, defaulting to 'balanced'."""
+    level = str(fidelity or "balanced").lower()
+    if level not in FIDELITY_LEVELS:
+        valid = ", ".join(sorted(FIDELITY_LEVELS))
+        raise ValueError(f"Unknown detail level {fidelity!r}. Choose one of: {valid}.")
+    return level
+
 
 def _random_timestamp() -> str:
     """Generates a realistic enterprise timestamp within the 2000-2002 corporate timeline."""
@@ -47,6 +93,14 @@ def _random_timestamp() -> str:
     minute = random.randint(0, 59)
     second = random.randint(0, 59)
     return f"{random_day} {hour:02d}:{minute:02d}:{second:02d}"
+
+
+def _synthetic_timestamp(realistic: bool) -> str:
+    """Current timestamp for faithful levels, generalized one for minimal."""
+    if realistic:
+        now = datetime.now()
+        return f"{now.date()} {now.hour:02d}:{now.minute:02d}:{now.second:02d}"
+    return _random_timestamp()
 
 
 def _call_ollama_batch(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 90) -> list[dict]:
@@ -192,33 +246,121 @@ Respond ONLY with a JSON object in this exact structure:
 """
 
 
+def _grounded_snippet(ref: dict, fidelity: str = "balanced") -> str:
+    """Extracts real facts from a reference item for grounded fallback content."""
+    level = _normalize_fidelity(fidelity)
+    cfg = FIDELITY_LEVELS[level]
+    parts = []
+    body = str(
+        ref.get("body_text") or ref.get("primary_text")
+        or ref.get("content") or ref.get("body") or ""
+    )
+    words = body.split()
+    if words:
+        max_words = cfg["max_words"]
+        parts.append(" ".join(words if max_words is None else words[:max_words]))
+
+    attrs = ref.get("attributes") or {}
+    if isinstance(attrs, str):
+        try:
+            attrs = json.loads(attrs)
+        except Exception:
+            attrs = {}
+    if isinstance(attrs, dict):
+        candidates = []
+        for key, val in attrs.items():
+            key_lower = str(key).lower().strip()
+            if key_lower in NOISE_KEYS or val is None:
+                continue
+            val_text = str(val).strip()
+            if not val_text or val_text.lower() in ("nan", "none"):
+                continue
+            if key_lower in ("title", "subject", "body", "description", "content", "text"):
+                continue  # already covered by the body snippet
+            # Identifiers (ticket ids, lots, resolutions) carry the most meaning.
+            priority = 0 if any(h in key_lower for h in _ID_ATTR_HINTS) else 1
+            candidates.append((priority, str(key), val_text[:200]))
+        candidates.sort(key=lambda item: item[0])
+        max_attrs = cfg["max_attrs"]
+        if max_attrs is not None:
+            candidates = candidates[:max_attrs]
+        parts.extend(f"{key}: {val}" for _, key, val in candidates)
+    joined = " ".join(parts)
+    return joined if level == "full" else joined[:1200]
+
+
+def _reference_flags(ref: dict) -> tuple[bool, bool]:
+    """Reads compliance/executive signals from a reference item if present."""
+    attrs = ref.get("attributes") or {}
+    if isinstance(attrs, str):
+        try:
+            attrs = json.loads(attrs)
+        except Exception:
+            attrs = {}
+    if not isinstance(attrs, dict):
+        attrs = {}
+    is_risk = (
+        int(ref.get("compliance_label", 0) or 0) == 1
+        or int(attrs.get("compliance_label", 0) or attrs.get("Label", 0) or 0) == 1
+    )
+    is_exec = bool(
+        ref.get("is_executive", False)
+        or attrs.get("is_executive", False)
+        or attrs.get("POI-Present", False)
+    )
+    return is_risk, is_exec
+
+
 def _generate_fallback_records(
     reference_items: list[dict],
     data_type: str,
     batch_size: int,
+    fidelity: str = "balanced",
 ) -> list[dict]:
-    """Fast, deterministic fallback generator preserving ongoing process details."""
+    """Fast, deterministic fallback generator grounded in reference facts."""
+    level = _normalize_fidelity(fidelity)
+    cfg = FIDELITY_LEVELS[level]
     records = []
     type_domain, _, _ = _get_type_guidance(data_type)
 
     for i in range(batch_size):
-        ref = reference_items[i] if i < len(reference_items) else {}
+        ref = reference_items[i] if i < len(reference_items) and isinstance(reference_items[i], dict) else {}
         base_title = ref.get("title") or ref.get("subject") or f"Enterprise Review #{i+1}"
-        base_text = ref.get("body_text") or ref.get("primary_text") or ref.get("content") or ref.get("body") or "Standard ongoing enterprise workflow."
-        first_clause = base_text.split(".")[0] if "." in base_text else base_text[:120]
+        safe_title = sanitize_enterprise_text(str(base_title)[:60])
 
-        dept = random.choice(ENTERPRISE_DEPARTMENTS)
-        is_risk = ref.get("compliance_label", 0) == 1 or (i % 6 == 0)
-        is_exec = ref.get("is_executive", False) or ("executive" in dept.lower())
+        if cfg["keep_department"] and ref.get("department"):
+            dept = ref["department"]
+        else:
+            dept = random.choice(ENTERPRISE_DEPARTMENTS)
+
+        if cfg["keep_flags"]:
+            is_risk, is_exec = _reference_flags(ref)
+        else:
+            is_risk = ref.get("compliance_label", 0) == 1 or (i % 6 == 0)
+            is_exec = ref.get("is_executive", False) or ("executive" in dept.lower())
+
+        facts = _grounded_snippet(ref, fidelity=level)
+        if facts:
+            content = (
+                f"Synthetic {type_domain} summary regarding {safe_title}. "
+                f"Key facts: {facts}"
+            )
+        else:
+            content = (
+                f"Operational Process Review regarding {safe_title}. This synthetic summary describes {type_domain} "
+                f"handled by {dept}. All associated enterprise procedures, documentation, and compliance checkpoints "
+                f"have been audited in accordance with {dept} protocols."
+            )
 
         records.append({
             "source_doc_id": ref.get("doc_id"),
-            "title": f"Synthetic Process: {base_title[:60]}",
-            "content": f"Operational Process Review regarding {base_title}. Context: {first_clause.strip()}. All associated enterprise procedures, documentation, and compliance checkpoints have been audited in accordance with {dept} protocols.",
             "data_type": data_type,
+            "title": f"Synthetic Process: {safe_title}",
+            "content": content,
             "department": dept,
             "author": f"lead.{dept.split()[0].lower()}@company.internal",
             "recipient": "corporate-audit@company.internal" if is_risk else "operations-team@company.internal",
+            "timestamp": _synthetic_timestamp(cfg["realistic_timestamp"]),
             "compliance_label": 1 if is_risk else 0,
             "is_executive": is_exec,
         })
@@ -233,26 +375,33 @@ def synthesize_batch(
     additional_context: str = None,
     model: str = DEFAULT_MODEL,
     use_ollama: bool = True,
+    fidelity: str = "balanced",
 ) -> dict:
     """
     Synthesizes a single batch of records for any data_type using Ollama or fallback,
     referencing samples from documents table in vault, and saving into synthetic_database.duckdb.
     """
+    level = _normalize_fidelity(fidelity)
+    cfg = FIDELITY_LEVELS[level]
     # Grab reference samples from vault if available
     vault_conn = get_vault_conn()
     try:
         if data_type and data_type != "general":
             sample_rows = vault_conn.execute(
-                "SELECT doc_id, title, body_text, data_type, attributes FROM documents WHERE data_type = ? LIMIT ?;",
+                "SELECT doc_id, title, body_text, data_type, attributes, department FROM documents WHERE data_type = ? LIMIT ?;",
                 [data_type, batch_size],
             ).fetchall()
         else:
             sample_rows = vault_conn.execute(
-                "SELECT doc_id, title, body_text, data_type, attributes FROM documents LIMIT ?;",
+                "SELECT doc_id, title, body_text, data_type, attributes, department FROM documents LIMIT ?;",
                 [batch_size],
             ).fetchall()
 
-        reference_items = [{"doc_id": r[0], "title": r[1], "body_text": r[2], "data_type": r[3]} for r in sample_rows]
+        reference_items = [
+            {"doc_id": r[0], "title": r[1], "body_text": r[2], "data_type": r[3],
+             "attributes": r[4], "department": r[5]}
+            for r in sample_rows
+        ]
     finally:
         vault_conn.close()
 
@@ -265,8 +414,9 @@ def synthesize_batch(
         constraints_prompt.append(f"MANDATORY ALIASES: {rep_str}")
     if additional_context:
         constraints_prompt.append(f"USER FOCUS / PROCESS DIRECTIVE: {additional_context}")
+    constraints_prompt.append(f"DETAIL LEVEL ({cfg['label']}): {cfg['description']}")
 
-    user_rules_text = "\n".join(constraints_prompt) if constraints_prompt else "Ensure professional enterprise tone."
+    user_rules_text = "\n".join(constraints_prompt)
     prompt = _build_synthesis_prompt(data_type, reference_items, batch_size, user_rules_text)
 
     raw_records = []
@@ -278,7 +428,7 @@ def synthesize_batch(
             use_ollama = False
 
     if not raw_records:
-        raw_records = _generate_fallback_records(reference_items, data_type, batch_size)
+        raw_records = _generate_fallback_records(reference_items, data_type, batch_size, fidelity=level)
 
     # Clean & enforce constraints
     cleaned_records = []
@@ -296,7 +446,7 @@ def synthesize_batch(
             "department": r.get("department", "Corporate Operations"),
             "author": author,
             "recipient": recipient,
-            "timestamp": _random_timestamp(),
+            "timestamp": _synthetic_timestamp(cfg["realistic_timestamp"]),
             "compliance_label": int(r.get("compliance_label", 0)),
             "is_executive": bool(r.get("is_executive", False)),
             "metadata": r.get("metadata", {}),
@@ -328,6 +478,8 @@ def synthesize_from_file(
     clearance_level: str = None,
     use_ollama: bool = True,
     model: str = DEFAULT_MODEL,
+    fidelity: str = "balanced",
+    department: str = None,
 ) -> dict:
     """
     Universal Synthesis from ANY File Format:
@@ -335,6 +487,8 @@ def synthesize_from_file(
     extracts the ongoing business processes and workflows, and synthesizes clean,
     privacy-protected records into data/synthetic_database.duckdb with explicit access roles.
     """
+    level = _normalize_fidelity(fidelity)
+    cfg = FIDELITY_LEVELS[level]
     if not os.path.exists(source_file):
         raise FileNotFoundError(f"Source file not found: {source_file}")
 
@@ -369,8 +523,9 @@ def synthesize_from_file(
         constraints_prompt.append(f"MANDATORY ALIASES: {rep_str}")
     if additional_context:
         constraints_prompt.append(f"USER FOCUS / TOPIC GUIDANCE: {additional_context}")
+    constraints_prompt.append(f"DETAIL LEVEL ({cfg['label']}): {cfg['description']}")
 
-    user_rules_text = "\n".join(constraints_prompt) if constraints_prompt else "Ensure professional enterprise tone."
+    user_rules_text = "\n".join(constraints_prompt)
 
     total_generated = 0
     all_synthesized = []
@@ -380,6 +535,8 @@ def synthesize_from_file(
 
     for chunk_idx in range(n_chunks):
         chunk_docs = docs[chunk_idx * batch_chunk_size : (chunk_idx + 1) * batch_chunk_size]
+        if department:
+            chunk_docs = [{**d, "department": d.get("department") or department} for d in chunk_docs]
         prompt = _build_synthesis_prompt(detected_type, chunk_docs, len(chunk_docs), user_rules_text)
 
         raw_records = []
@@ -391,7 +548,7 @@ def synthesize_from_file(
                 use_ollama = False
 
         if not raw_records:
-            raw_records = _generate_fallback_records(chunk_docs, detected_type, len(chunk_docs))
+            raw_records = _generate_fallback_records(chunk_docs, detected_type, len(chunk_docs), fidelity=level)
 
         # Clean, redact, and prepare records with access controls
         cleaned_batch = []
@@ -417,7 +574,11 @@ def synthesize_from_file(
 
             title = _apply_user_constraints(raw_title, forbidden_terms, custom_replacements)
             content = _apply_user_constraints(raw_content, forbidden_terms, custom_replacements)
-            dept = r.get("department") or fallback_doc.get("attributes", {}).get("department", "Corporate Operations")
+            dept = (
+                r.get("department")
+                or fallback_doc.get("department")
+                or fallback_doc.get("attributes", {}).get("department", "Corporate Operations")
+            )
             author = r.get("author") or r.get("author_or_sender") or r.get("sender", "employee@company.internal")
             recipient = r.get("recipient") or r.get("recipient_or_audience") or r.get("recipient", "team@company.internal")
 
@@ -429,7 +590,7 @@ def synthesize_from_file(
                 "department": dept,
                 "author": author,
                 "recipient": recipient,
-                "timestamp": _random_timestamp(),
+                "timestamp": _synthetic_timestamp(cfg["realistic_timestamp"]),
                 "compliance_label": int(r.get("compliance_label", 0)),
                 "is_executive": bool(r.get("is_executive", False)),
                 "metadata": fallback_doc.get("attributes", {}),
@@ -472,22 +633,25 @@ def synthesize_from_vault(
     additional_context: str = None,
     use_ollama: bool = True,
     model: str = DEFAULT_MODEL,
+    fidelity: str = "balanced",
 ) -> dict:
     """
     Synthesizes across ALL files and data types currently in the documents vault,
     giving the AI agent a unified, privacy-safe 360-degree knowledge base of
     all ongoing enterprise processes.
     """
+    level = _normalize_fidelity(fidelity)
+    cfg = FIDELITY_LEVELS[level]
     vault_conn = get_vault_conn()
     try:
         if data_type:
             rows = vault_conn.execute(
-                "SELECT doc_id, source_file, data_type, title, body_text, attributes FROM documents WHERE data_type = ? LIMIT ?;",
+                "SELECT doc_id, source_file, data_type, title, body_text, attributes, department FROM documents WHERE data_type = ? LIMIT ?;",
                 [data_type, n_records],
             ).fetchall()
         else:
             rows = vault_conn.execute(
-                "SELECT doc_id, source_file, data_type, title, body_text, attributes FROM documents LIMIT ?;",
+                "SELECT doc_id, source_file, data_type, title, body_text, attributes, department FROM documents LIMIT ?;",
                 [n_records],
             ).fetchall()
 
@@ -499,6 +663,7 @@ def synthesize_from_vault(
                 "title": r[3],
                 "body_text": r[4],
                 "attributes": json.loads(r[5]) if isinstance(r[5], str) else r[5],
+                "department": r[6],
             }
             for r in rows
         ]
@@ -517,8 +682,9 @@ def synthesize_from_vault(
         constraints_prompt.append(f"MANDATORY ALIASES: {rep_str}")
     if additional_context:
         constraints_prompt.append(f"USER FOCUS / PROCESS DIRECTIVE: {additional_context}")
+    constraints_prompt.append(f"DETAIL LEVEL ({cfg['label']}): {cfg['description']}")
 
-    user_rules_text = "\n".join(constraints_prompt) if constraints_prompt else "Ensure professional enterprise tone."
+    user_rules_text = "\n".join(constraints_prompt)
 
     # Group by data_type and synthesize each group
     grouped = {}
@@ -539,7 +705,7 @@ def synthesize_from_vault(
                 except Exception:
                     pass
             if not raw:
-                raw = _generate_fallback_records(sub_chunk, dt, len(sub_chunk))
+                raw = _generate_fallback_records(sub_chunk, dt, len(sub_chunk), fidelity=level)
 
             batch_to_save = []
             for i, r in enumerate(raw):
@@ -554,10 +720,10 @@ def synthesize_from_vault(
                     "data_type": dt,
                     "title": title,
                     "content": content,
-                    "department": r.get("department", "Corporate Operations"),
+                    "department": r.get("department") or parent_doc.get("department", "Corporate Operations"),
                     "author": author,
                     "recipient": recipient,
-                    "timestamp": _random_timestamp(),
+                    "timestamp": _synthetic_timestamp(cfg["realistic_timestamp"]),
                     "compliance_label": int(r.get("compliance_label", 0)),
                     "is_executive": bool(r.get("is_executive", False)),
                     "metadata": parent_doc.get("attributes", {}),

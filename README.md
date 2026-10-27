@@ -1,8 +1,8 @@
-# Corporate_AI — Privacy-Preserving Enterprise Copilot
+# Corporate_AI - Privacy-Preserving Enterprise Copilot
 
 A native desktop AI assistant and data synthesis platform with Role-Based Access Control (RBAC).
 
-## Quickstart — Launch Desktop Application
+## Quickstart - Launch Desktop Application
 
 Run the desktop app directly:
 

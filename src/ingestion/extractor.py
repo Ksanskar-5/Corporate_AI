@@ -1,5 +1,5 @@
 """
-extractor.py — Universal Feature Extractor for Synthesis
+extractor.py - Universal Feature Extractor for Synthesis
 Extracts the target text, conditioning prompts, and relevant context attributes
 from DuckDB, filtering out technical noise (MIME, server hashes, nulls).
 """

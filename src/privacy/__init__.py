@@ -1,5 +1,5 @@
 """
-privacy package — Privacy & Semantic Utility Scorecard Engine
+privacy package - Privacy & Semantic Utility Scorecard Engine
 """
 from .evaluator import (
     evaluate_pii_leakage,

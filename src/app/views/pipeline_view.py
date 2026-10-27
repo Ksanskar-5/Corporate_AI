@@ -1,5 +1,5 @@
 """
-pipeline_view.py — Enterprise Data Ingestion & Synthesis Studio Screen
+pipeline_view.py - Enterprise Data Ingestion & Synthesis Studio Screen
 Manage raw data ingestion into vault.duckdb and trigger synthetic generation runs.
 """
 
@@ -138,6 +138,8 @@ class PipelineView(ctk.CTkFrame):
     def _build_ingestion_section(self):
         ingest_card = ctk.CTkFrame(self.content_scroll, fg_color="#1E293B", corner_radius=12)
         ingest_card.pack(fill="x", pady=(0, 15))
+        self.ingest_card = ingest_card
+        self._refresh_upload_access()
 
         ctk.CTkLabel(
             ingest_card,
@@ -263,6 +265,18 @@ class PipelineView(ctk.CTkFrame):
         self.synth_type_combo.set("All Types")
         self.synth_type_combo.pack(side="left", padx=(0, 16))
 
+        ctk.CTkLabel(ctrl_row, text="Detail Level:", font=ctk.CTkFont(size=12), text_color="#CBD5E1").pack(side="left", padx=(0, 6))
+        self.synth_fidelity_combo = ctk.CTkComboBox(
+            ctrl_row,
+            values=["Balanced", "Full", "Minimal"],
+            width=110,
+            height=34,
+            fg_color="#0F172A",
+            border_color="#475569",
+        )
+        self.synth_fidelity_combo.set("Balanced")
+        self.synth_fidelity_combo.pack(side="left", padx=(0, 16))
+
         self.synth_engine_toggle = ctk.CTkCheckBox(
             ctrl_row,
             text="Use Local Ollama LLM (gemma3:4b)",
@@ -307,8 +321,19 @@ class PipelineView(ctk.CTkFrame):
 
     def on_view_activated(self):
         """Refreshes live stats and scorecard on display."""
+        self._refresh_upload_access()
         self._refresh_stats()
         self._refresh_scorecard()
+
+    def _refresh_upload_access(self):
+        """Hides the file-ingestion controls from roles without upload rights."""
+        card = getattr(self, "ingest_card", None)
+        if card is None:
+            return
+        if session.can_upload:
+            card.pack(fill="x", pady=(0, 15))
+        else:
+            card.pack_forget()
 
     def _refresh_stats(self):
         try:
@@ -361,6 +386,9 @@ class PipelineView(ctk.CTkFrame):
     def _start_ingestion(self):
         if self.is_processing:
             return
+        if not session.can_upload:
+            self._append_log("Error: Your role cannot add files. Contact a Manager or Admin.")
+            return
         path = self.file_path_entry.get().strip()
         if not path or not os.path.exists(path):
             self._append_log("Error: Please select a valid file to ingest.")
@@ -391,17 +419,18 @@ class PipelineView(ctk.CTkFrame):
         dt = self.synth_type_combo.get()
         dt = None if dt == "All Types" else dt
         use_ollama = bool(self.synth_engine_toggle.get())
+        fidelity = self.synth_fidelity_combo.get().lower()
 
         self.is_processing = True
         self.run_synth_btn.configure(state="disabled")
         mode_str = "Ollama gemma3:4b" if use_ollama else "Fast Structured Generator"
-        self._append_log(f"Starting synthesis of {count} records using {mode_str}...")
+        self._append_log(f"Starting synthesis of {count} records using {mode_str} at '{fidelity}' detail level...")
 
-        threading.Thread(target=self._run_synthesis_thread, args=(count, dt, use_ollama), daemon=True).start()
+        threading.Thread(target=self._run_synthesis_thread, args=(count, dt, use_ollama, fidelity), daemon=True).start()
 
-    def _run_synthesis_thread(self, count: int, dt: str, use_ollama: bool):
+    def _run_synthesis_thread(self, count: int, dt: str, use_ollama: bool, fidelity: str):
         try:
-            res = synthesize_from_vault(data_type=dt, n_records=count, use_ollama=use_ollama)
+            res = synthesize_from_vault(data_type=dt, n_records=count, use_ollama=use_ollama, fidelity=fidelity)
             self.after(0, self._append_log, f"Synthesized {res.get('records_synthesized')} records into synthetic_database.duckdb.")
             self.after(0, self._append_log, "Updating Chroma DB vector store embeddings...")
             build_vector_store(force_reindex=True)
